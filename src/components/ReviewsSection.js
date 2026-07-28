@@ -99,7 +99,11 @@ export default function ReviewsSection({ content }) {
             }}
           >
             {loopingReviews.map((review, index) => (
-              <article className="review-card" key={`${review.id}-${index}`}>
+              <article
+                className="review-card reveal-stagger-item"
+                key={`${review.id}-${index}`}
+                style={{ "--reveal-index": index % reviews.length }}
+              >
                 <div className="review-stars" aria-label="5 out of 5 stars">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <span aria-hidden="true" key={star}>

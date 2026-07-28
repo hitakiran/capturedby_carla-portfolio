@@ -34,7 +34,7 @@ export default function GalleryImage({ delay, photo }) {
 
   return (
     <article
-      className={`mb-10 inline-block w-full break-inside-avoid cursor-pointer transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.03] ${
+      className={`mb-10 inline-block w-full break-inside-avoid cursor-pointer transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.03] hover:shadow-[0_18px_36px_rgba(70,60,50,0.16)] ${
         isVisible ? "translate-y-0 opacity-100" : "translate-y-7 opacity-0"
       }`}
       ref={imageRef}

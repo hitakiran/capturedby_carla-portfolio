@@ -63,7 +63,7 @@ export const investmentCategories = [
         name: "The Pelude",
         description:
           "for intimate celebrations in the beginning of your forever (elopement, courthouse or intimate ceremony)",
-        price: "begins at $1,750",
+        price: "begins at $1,050",
         includes: [
           "Up to 4 hours of coverage",
           "Timeline guidance",
@@ -80,7 +80,7 @@ export const investmentCategories = [
         name: "The Promise",
         description:
           "for the couples who want the heart of their day documented from getting ready through the beginning of the reception",
-        price: "begins at $2,650",
+        price: "begins at $1,895",
         includes: [
           "Up to 8 hours of coverage",
           "Complimentary engagement session",
@@ -99,11 +99,11 @@ export const investmentCategories = [
         name: "The Timeless Piece",
         description:
           "curated and designed for couples who want every meaningful moment, captured with intention, artistry, and care",
-        price: "begins at $3,345",
+        price: "begins at $2,345",
         includes: [
           "Up to 10–12 hours of coverage",
           "Complimentary engagement session",
-          "Second photographer",
+          "Complementary Prints + custom wedding day memory book",
           "Custom wedding timeline planning",
           "Detail styling photographs",
           "Getting ready through grand exit",
@@ -169,7 +169,7 @@ export const investmentCategories = [
   {
     id: "families",
     name: "Families",
-    intro: "Relaxed family sessions built around movement, connection, and real moments.",
+    intro: "",
     packages: [
       {
         id: "family-mini",
@@ -219,7 +219,7 @@ export const investmentCategories = [
         name: "The Gathering",
         description:
           "thoughtfully designed for grand openings, workshops, wellness classes, launch parties, pop-ups, community events, and every meaningful occasion worth remembering",
-        price: "begins at $780",
+        price: "begins at $560",
         includes: [
           "Up to 4 hours of coverage",
           "Event storytelling",

@@ -51,12 +51,16 @@ export default function CategoryShowcase({ categories }) {
 
       {/* This patterned area holds the rotating photos, text frame, and dots. */}
       <div className="showcase-pattern-area">
-        <div className={`showcase-collage ${activeCategory.layoutVariant}`}>
+        <div
+          className={`showcase-collage ${activeCategory.layoutVariant}`}
+          key={activeCategory.id}
+        >
           {/* Decorative placeholder photos around the center callout. */}
           {activeCategory.photos.map((photoUrl, photoIndex) => (
             <div
               className={`showcase-photo showcase-photo-${photoIndex + 1}`}
               key={`${activeCategory.id}-${photoUrl}`}
+              style={{ "--reveal-index": photoIndex }}
             >
               <Image
                 src={photoUrl}
@@ -68,12 +72,14 @@ export default function CategoryShowcase({ categories }) {
             </div>
           ))}
 
-          {/* The text box uses sectionbox.png as the same decorative frame for every category. */}
-          <div className="showcase-card-block">
+          {/* The text box uses the lace frame as the same decorative frame for every category. */}
+          <div className="showcase-card-block" style={{ "--reveal-index": 4 }}>
             <div className="showcase-card-frame">
               <div className="showcase-card">
                 <p className="section-eyebrow">Featured Stories</p>
-                <h2 id="showcase-heading">{activeCategory.category}</h2>
+                <h2 className="showcase-category-title" id="showcase-heading">
+                  {activeCategory.category}
+                </h2>
                 <p>{activeCategory.label}</p>
               </div>
             </div>

@@ -3,6 +3,7 @@ import CategoryShowcase from "@/components/CategoryShowcase";
 import ContactFooter from "@/components/ContactFooter";
 import MarqueeStrip from "@/components/MarqueeStrip";
 import MirrorArcText from "@/components/MirrorArcText";
+import RevealOnScroll from "@/components/RevealOnScroll";
 import ReviewsSection from "@/components/ReviewsSection";
 import SiteHeader from "@/components/SiteHeader";
 import StatsSection from "@/components/StatsSection";
@@ -145,10 +146,17 @@ export default async function Home() {
       </section>
 
       {/* Section 2: rotating placeholder category collage. */}
-      <CategoryShowcase categories={liveCategoryShowcase} />
+      <RevealOnScroll>
+        <CategoryShowcase categories={liveCategoryShowcase} />
+      </RevealOnScroll>
 
       {/* Section 3: placeholder About Me section. */}
-      <section className="about-section" id="about" aria-labelledby="about-heading">
+      <RevealOnScroll
+        as="section"
+        className="about-section"
+        id="about"
+        aria-labelledby="about-heading"
+      >
         <div className="about-image-wrap">
           {/* border.png is the only frame around the portrait. */}
           <span className="about-frame-border" aria-hidden="true" />
@@ -177,23 +185,31 @@ export default async function Home() {
           {liveAboutContent.paragraphs.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
+          {/* The closing signature uses the same cursive font as the brand name. */}
+          <p className="about-signature">{liveAboutContent.signature}</p>
           <a className="text-button" href="#contact">
             Get in Touch
           </a>
         </div>
-      </section>
+      </RevealOnScroll>
 
       {/* Section 4: simple animated proof points for social trust. */}
-      <StatsSection content={statsContent} />
+      <RevealOnScroll>
+        <StatsSection content={statsContent} />
+      </RevealOnScroll>
 
       {/* Small scrolling brand strip between stats and reviews. */}
       <MarqueeStrip />
 
       {/* Section 5: rotating placeholder reviews from future clients. */}
-      <ReviewsSection content={reviewsContent} />
+      <RevealOnScroll>
+        <ReviewsSection content={reviewsContent} />
+      </RevealOnScroll>
 
       {/* Section 6: contact form UI and footer navigation. */}
-      <ContactFooter content={contactContent} />
+      <RevealOnScroll>
+        <ContactFooter content={contactContent} />
+      </RevealOnScroll>
     </main>
   );
 }

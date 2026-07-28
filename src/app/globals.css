@@ -59,6 +59,113 @@ a {
   min-height: 100vh;
 }
 
+/*
+  Reusable scroll reveal animation.
+  The small JavaScript helper adds .is-visible once; CSS does the motion.
+*/
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 360ms ease-out,
+    transform 360ms ease-out;
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/*
+  Staggered items start hidden, then reveal one after another.
+  Components set --reveal-index: 0, 1, 2... to create the delay.
+*/
+.reveal-on-scroll .reveal-stagger-item,
+.reveal-stagger-group .reveal-stagger-item {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 320ms ease-out,
+    transform 320ms ease-out,
+    box-shadow 240ms ease-out,
+    background-color 180ms ease-out,
+    color 180ms ease-out;
+  transition-delay: calc(var(--reveal-index, 0) * 70ms);
+}
+
+.reveal-on-scroll.is-visible .reveal-stagger-item,
+.reveal-stagger-group.is-visible .reveal-stagger-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes soft-load-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes category-showcase-fade {
+  from {
+    opacity: 0.28;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-image-drift {
+  /*
+    This slow movement gives the hero photo a cinematic feel without distracting
+    from the mirror logo or buttons.
+  */
+  from {
+    transform: scale(1.02) translate3d(-0.8%, -0.6%, 0);
+  }
+
+  to {
+    transform: scale(1.08) translate3d(0.8%, 0.6%, 0);
+  }
+}
+
+@keyframes mirror-float {
+  /*
+    A very small float makes the ornate mirror feel lighter on the hero image.
+  */
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes lace-soft-pulse {
+  /*
+    The lace frame gently breathes so the rotating category area feels less flat.
+  */
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.015);
+  }
+}
+
 /* SECTION 1: Header and hero */
 .hero-section {
   align-items: center;
@@ -78,7 +185,9 @@ a {
 }
 
 .hero-image {
+  animation: hero-image-drift 18s ease-in-out infinite alternate;
   filter: saturate(0.78) contrast(0.95);
+  will-change: transform;
 }
 
 .main-nav {
@@ -116,6 +225,27 @@ a {
   width: max-content;
 }
 
+.nav-group a {
+  position: relative;
+}
+
+.nav-group a::after {
+  background: currentColor;
+  bottom: -7px;
+  content: "";
+  height: 1px;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  transition: transform 220ms ease-out;
+  width: 100%;
+}
+
+.nav-group a:hover::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
 .nav-center-stack {
   align-items: center;
   display: flex;
@@ -138,6 +268,10 @@ a {
   text-shadow: 0 2px 16px rgba(var(--text-rgb), 0.55);
   text-transform: lowercase;
   white-space: nowrap;
+}
+
+.nav-brand:hover {
+  transform: translateY(-1px);
 }
 
 .hero-nav-social-links {
@@ -165,6 +299,8 @@ a {
 .hero-nav-social-links a:hover {
   background: var(--background);
   color: var(--walnut);
+  box-shadow: 0 10px 24px rgba(var(--text-rgb), 0.2);
+  transform: translateY(-2px) scale(1.08);
 }
 
 .nav-group-right {
@@ -203,6 +339,7 @@ a {
 
 .hero-content {
   align-items: center;
+  animation: soft-load-up 420ms ease-out 120ms both;
   color: var(--background);
   display: flex;
   flex-direction: column;
@@ -216,6 +353,7 @@ a {
 
 .mirror-logo {
   align-items: center;
+  animation: mirror-float 5.6s ease-in-out infinite;
   display: flex;
   /* The mirror is a little larger so the bigger text still has room to breathe. */
   height: clamp(275px, 36vw, 430px);
@@ -435,6 +573,7 @@ a {
 
 .showcase-collage {
   align-items: center;
+  animation: category-showcase-fade 360ms ease-out both;
   display: grid;
   /* Extra grid gap keeps the corner photos from touching the ticket box. */
   gap: clamp(56px, 6vw, 128px);
@@ -454,9 +593,25 @@ a {
   box-shadow: 0 18px 40px rgba(var(--text-rgb), 0.16);
   overflow: hidden;
   position: relative;
-  transition: width 240ms ease, transform 240ms ease;
+  transition:
+    box-shadow 260ms ease-out,
+    opacity 260ms ease-out,
+    width 240ms ease,
+    transform 240ms ease;
   width: min(100%, 315px);
   z-index: 1;
+}
+
+.showcase-photo img {
+  transition: transform 280ms ease-out;
+}
+
+.showcase-photo:hover {
+  box-shadow: 0 24px 54px rgba(var(--text-rgb), 0.2);
+}
+
+.showcase-photo:hover img {
+  transform: scale(1.04);
 }
 
 .showcase-photo-1 {
@@ -582,17 +737,18 @@ a {
   grid-row: 1 / 3;
   justify-self: center;
   transform: translateY(-76px);
-  width: min(100%, 760px);
+  width: min(100%, 700px);
   z-index: 3;
 }
 
 .showcase-card-frame {
-  /* sectionbox.png is the ticket-style frame behind the text. */
-  aspect-ratio: 1524 / 1168;
-  background-image: url("/images/sectionbox.png?v=4");
+  /* lace-frame.png is the round decorative frame behind the category text. */
+  animation: lace-soft-pulse 5.8s ease-in-out infinite;
+  aspect-ratio: 1 / 1;
+  background-image: url("/images/lace-frame-transparent.png");
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 100% 100%;
+  background-size: contain;
   position: relative;
   width: 100%;
 }
@@ -607,10 +763,10 @@ a {
   height: 100%;
   justify-content: center;
   /*
-    This padding keeps the editable text safely inside the dotted border
-    printed on sectionbox.png.
+    The round lace frame has a smaller safe text area than the old rectangle,
+    so this padding keeps the words centered inside the open circle.
   */
-  padding: clamp(92px, 7vw, 126px) clamp(112px, 8vw, 150px);
+  padding: clamp(150px, 12vw, 205px) clamp(132px, 11vw, 190px);
   position: relative;
   text-align: center;
   width: 100%;
@@ -624,11 +780,16 @@ a {
   text-transform: uppercase;
 }
 
-.showcase-card h2 {
-  /* Keep every category name on one line inside the wider ticket box. */
-  font-size: clamp(3.3rem, 5vw, 5.25rem);
+.showcase-card h2.showcase-category-title {
+  /* Use the existing script font for the rotating category names. */
+  font-family: var(--font-script), "Brush Script MT", cursive;
+  font-size: clamp(4rem, 5.8vw, 5.8rem);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 0.95;
   max-width: 100%;
   overflow-wrap: normal;
+  text-transform: none;
   white-space: nowrap;
 }
 
@@ -667,8 +828,35 @@ a {
   letter-spacing: 0.16em;
   justify-content: center;
   padding: 13px 22px;
+  overflow: hidden;
+  position: relative;
   text-align: center;
   text-transform: uppercase;
+}
+
+.showcase-actions a::after,
+.text-button::after {
+  /*
+    The shine only appears on hover. It adds polish while keeping the button
+    color and shape exactly the same.
+  */
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--background-rgb), 0.28),
+    transparent
+  );
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-135%) skewX(-18deg);
+  transition: transform 520ms ease-out;
+}
+
+.showcase-actions a:hover::after,
+.text-button:hover::after {
+  transform: translateX(135%) skewX(-18deg);
 }
 
 .showcase-actions a {
@@ -683,6 +871,8 @@ a {
 .showcase-actions a:hover,
 .text-button:hover {
   background: var(--walnut);
+  box-shadow: 0 12px 24px rgba(var(--text-rgb), 0.16);
+  transform: translateY(-2px) scale(1.015);
 }
 
 .section-eyebrow {
@@ -715,6 +905,13 @@ a {
   transform: scale(1.25);
 }
 
+.showcase-dots button,
+.review-dots button {
+  transition:
+    background-color 180ms ease-out,
+    transform 180ms ease-out;
+}
+
 /* SECTION 3: About Me */
 .about-section {
   align-items: center;
@@ -724,7 +921,7 @@ a {
   /*
     The first column is a little wider so the framed portrait can be larger.
   */
-  grid-template-columns: minmax(290px, 575px) minmax(280px, 560px);
+  grid-template-columns: minmax(330px, 675px) minmax(280px, 560px);
   justify-content: center;
   padding: clamp(72px, 9vw, 130px) clamp(20px, 5vw, 72px);
   position: relative;
@@ -736,10 +933,19 @@ a {
     shape and lets the lace artwork scale inside it.
   */
   aspect-ratio: 1 / 1;
-  max-width: 590px;
+  max-width: 700px;
   overflow: visible;
   position: relative;
   width: 100%;
+}
+
+.about-image-wrap:hover .about-photo-window img {
+  transform: scale(1.035);
+}
+
+.about-image-wrap:hover .about-frame-border {
+  opacity: 0.9;
+  transform: scale(1.012);
 }
 
 .about-photo-window {
@@ -758,6 +964,7 @@ a {
   /* Keep the portrait proportional while filling the full frame opening. */
   object-fit: cover;
   object-position: center center;
+  transition: transform 360ms ease-out;
 }
 
 .about-frame-border {
@@ -774,6 +981,9 @@ a {
   mix-blend-mode: multiply;
   pointer-events: none;
   position: absolute;
+  transition:
+    opacity 260ms ease-out,
+    transform 260ms ease-out;
   z-index: 1;
 }
 
@@ -800,13 +1010,24 @@ a {
 }
 
 .about-copy h2.about-heading-script {
-  /* Carla's name uses the existing script font for brand consistency. */
+  /* The opening About heading uses the existing script font for brand consistency. */
   font-family: var(--font-script), "Brush Script MT", cursive;
-  font-size: clamp(4rem, 9vw, 6.5rem);
+  font-size: clamp(3.7rem, 7.5vw, 5.8rem);
   font-variant-caps: normal;
   font-weight: 400;
   letter-spacing: 0;
-  line-height: 0.9;
+  line-height: 0.95;
+  text-transform: none;
+}
+
+.about-signature {
+  font-family: var(--font-script), "Brush Script MT", cursive;
+  font-size: clamp(2.8rem, 5.5vw, 4.4rem);
+  font-variant-caps: normal;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 0.95;
+  margin-top: -4px;
   text-transform: none;
 }
 
@@ -969,5 +1190,23 @@ a {
   .showcase-card h2 {
     /* Small screens get a smaller heading so it still stays on one line. */
     font-size: clamp(2.5rem, 12vw, 3.1rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal-on-scroll,
+  .reveal-on-scroll .reveal-stagger-item,
+  .reveal-stagger-group .reveal-stagger-item {
+    opacity: 1;
+    transform: none;
   }
 }

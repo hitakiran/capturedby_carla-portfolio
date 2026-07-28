@@ -63,6 +63,15 @@
 .stat-card {
   border-top: 1px solid rgba(var(--text-rgb), 0.18);
   padding: clamp(24px, 4vw, 38px) 10px 0;
+  transition:
+    border-color 220ms ease-out,
+    color 220ms ease-out,
+    transform 240ms ease-out;
+}
+
+.stat-card:hover {
+  border-color: rgba(var(--text-rgb), 0.34);
+  transform: translateY(-3px);
 }
 
 .stat-card strong {
@@ -71,6 +80,14 @@
   font-size: clamp(3.2rem, 6vw, 5.8rem);
   font-weight: 500;
   line-height: 0.9;
+  transition:
+    color 220ms ease-out,
+    transform 240ms ease-out;
+}
+
+.stat-card:hover strong {
+  color: var(--walnut);
+  transform: translateY(-2px) scale(1.025);
 }
 
 .stat-card span {
@@ -97,6 +114,11 @@
   animation: marquee-scroll 34s linear infinite;
   display: flex;
   width: max-content;
+}
+
+.marquee-strip:hover .marquee-track {
+  /* Pausing on hover lets visitors actually read the repeated brand text. */
+  animation-play-state: paused;
 }
 
 .marquee-group {
@@ -163,19 +185,25 @@
 }
 
 .review-card {
-  align-items: flex-start;
   background: var(--warm-beige);
   border: 1px solid rgba(var(--text-rgb), 0.1);
   border-radius: 28px;
   box-shadow: 0 18px 42px rgba(var(--text-rgb), 0.08);
   color: var(--walnut);
-  display: flex;
+  display: grid;
   flex: 0 0 calc((100% - 72px) / 4);
-  flex-direction: column;
-  justify-content: center;
+  grid-template-rows: auto 1fr auto;
   padding: clamp(28px, 5vw, 48px);
   position: relative;
   text-align: left;
+  transition:
+    box-shadow 260ms ease-out,
+    transform 260ms ease-out;
+}
+
+.review-card:hover {
+  box-shadow: 0 24px 54px rgba(var(--text-rgb), 0.12);
+  transform: translateY(-4px);
 }
 
 .review-stars {
@@ -184,6 +212,15 @@
   font-size: 1.25rem;
   gap: 7px;
   letter-spacing: 0.05em;
+}
+
+.review-stars span {
+  display: inline-block;
+  transition: transform 220ms ease-out;
+}
+
+.review-card:hover .review-stars span {
+  transform: translateY(-2px) scale(1.06);
 }
 
 .review-card p {
@@ -272,6 +309,14 @@
   border-bottom: 1px solid var(--dusty-olive);
   color: var(--dusty-olive);
   font-weight: 700;
+  transition:
+    border-color 180ms ease-out,
+    color 180ms ease-out;
+}
+
+.contact-faq-note a:hover {
+  border-color: var(--clay);
+  color: var(--clay);
 }
 
 .contact-inner h2 {
@@ -373,6 +418,7 @@
   background: var(--clay);
   border-color: var(--clay);
   color: var(--sand);
+  transform: translateY(-2px);
 }
 
 .contact-form {
@@ -394,7 +440,21 @@
   font: inherit;
   font-size: 1rem;
   padding: 13px 15px;
+  transition:
+    border-color 200ms ease-out,
+    box-shadow 200ms ease-out,
+    background-color 200ms ease-out,
+    transform 200ms ease-out;
   width: 100%;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  background: rgba(var(--background-rgb), 0.45);
+  border-color: var(--clay);
+  box-shadow: 0 0 0 3px rgba(var(--text-rgb), 0.08);
+  transform: translateY(-1px);
+  outline: none;
 }
 
 .contact-form textarea {
@@ -436,6 +496,21 @@
   justify-content: center;
   line-height: 1;
   width: 24px;
+}
+
+.footer-top-link:hover span:last-child {
+  background: var(--clay);
+  border-color: var(--clay);
+  color: var(--sand);
+  transform: translateY(-2px);
+}
+
+.footer-mirror-logo {
+  transition: transform 260ms ease-out;
+}
+
+.footer-mirror-logo:hover {
+  transform: translateY(-4px) scale(1.02);
 }
 
 .footer-inner {

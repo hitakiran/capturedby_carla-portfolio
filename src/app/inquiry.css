@@ -51,6 +51,14 @@
   margin: 0 auto;
   max-width: 980px;
   padding: clamp(28px, 5vw, 62px);
+  transition:
+    border-color 260ms ease-out,
+    box-shadow 260ms ease-out;
+}
+
+.inquiry-form:focus-within {
+  border-color: rgba(var(--text-rgb), 0.18);
+  box-shadow: 0 28px 70px rgba(var(--text-rgb), 0.1);
 }
 
 .inquiry-intro-message {
@@ -110,7 +118,22 @@
   font: inherit;
   font-size: 1.02rem;
   padding: 14px 16px;
+  transition:
+    border-color 200ms ease-out,
+    box-shadow 200ms ease-out,
+    background-color 200ms ease-out,
+    transform 200ms ease-out;
   width: 100%;
+}
+
+.inquiry-form input:focus,
+.inquiry-form select:focus,
+.inquiry-form textarea:focus {
+  background: var(--sand);
+  border-color: var(--clay);
+  box-shadow: 0 0 0 3px rgba(var(--text-rgb), 0.08);
+  transform: translateY(-1px);
+  outline: none;
 }
 
 .inquiry-form textarea {
@@ -139,7 +162,17 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   padding: 14px 18px;
+  transition:
+    background-color 180ms ease-out,
+    box-shadow 220ms ease-out,
+    transform 220ms ease-out;
   text-transform: uppercase;
+}
+
+.inquiry-small-button:hover {
+  background: var(--walnut);
+  box-shadow: 0 12px 24px rgba(var(--text-rgb), 0.14);
+  transform: translateY(-2px);
 }
 
 .selected-date-list {
@@ -157,6 +190,16 @@
   cursor: pointer;
   font: inherit;
   padding: 8px 12px;
+  transition:
+    border-color 180ms ease-out,
+    color 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.selected-date-list button:hover {
+  border-color: var(--clay);
+  color: var(--clay);
+  transform: translateY(-1px);
 }
 
 .option-row,
@@ -182,6 +225,15 @@
   display: flex;
   gap: 12px;
   padding: 4px 0;
+  transition:
+    color 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.option-row label:hover,
+.meeting-options label:hover {
+  color: var(--dusty-olive);
+  transform: translateX(3px);
 }
 
 .option-row input,

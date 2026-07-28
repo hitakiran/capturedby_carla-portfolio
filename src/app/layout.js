@@ -1,5 +1,6 @@
 import { Cormorant_Garamond, Pinyon_Script } from "next/font/google";
 import "./globals.css";
+import "./faq.css";
 import "./home-sections.css";
 import "./inquiry.css";
 import "./investment.css";

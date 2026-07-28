@@ -3,7 +3,7 @@ import { portfolioCategories, portfolioPhotos } from "@/data/portfolio";
 
 export const metadata = {
   title: "Portfolio | Carla Santos Photography",
-  description: "A placeholder masonry photography portfolio for Carla Santos.",
+  description: "A masonry photography portfolio for Carla Santos.",
 };
 
 export default function PortfolioPage() {
@@ -11,8 +11,6 @@ export default function PortfolioPage() {
     <main className="portfolio-page" id="top">
       <PortfolioGallery
         categories={portfolioCategories}
-        heading="Stories told in honest, timeless frames."
-        intro="A curated placeholder gallery for Carla's brands, portraits, couples, weddings, and families work."
         photos={portfolioPhotos}
       />
     </main>

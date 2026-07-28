@@ -62,9 +62,13 @@ export default function InvestmentPackages({ categories }) {
         <h2 id="investment-packages-heading">{activeTitle}</h2>
         {activeCategory.intro && <p>{activeCategory.intro}</p>}
 
-        <div className={packageGridClassName}>
-          {activeCategory.packages.map((packageItem) => (
-            <article className="investment-package-card" key={packageItem.id}>
+        <div className={`${packageGridClassName} reveal-stagger-group is-visible`}>
+          {activeCategory.packages.map((packageItem, index) => (
+            <article
+              className="investment-package-card reveal-stagger-item"
+              key={packageItem.id}
+              style={{ "--reveal-index": index }}
+            >
               <div className="investment-package-header">
                 <p className="investment-package-label">{activeLabel}</p>
                 <h3>{packageItem.name}</h3>

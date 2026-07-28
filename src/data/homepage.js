@@ -9,7 +9,7 @@ export const navLinks = {
   ],
   right: [
     { label: "Investment", href: "/investment" },
-    { label: "FAQ", href: "/#faq" },
+    { label: "FAQ", href: "/faq" },
     { label: "Contact", href: "/#contact" },
   ],
 };
@@ -95,13 +95,18 @@ export const categoryShowcase = [
 
 export const aboutContent = {
   eyebrow: "About",
-  heading: "Carla Santos",
+  heading: "Hi I am Carla!",
   image_url:
     "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=85",
   paragraphs: [
-    "Placeholder bio text: Carla is a portrait, wedding, and lifestyle photographer who creates warm, intentional images for clients who want their story documented with care.",
-    "Her sessions are calm, guided, and personal. The goal is to help each client feel comfortable in front of the camera while creating photographs that feel elevated and true to them.",
+    "I'm so happy you're here. ♡",
+    "Photography has never just been about taking pretty pictures for me it's about preserving the feeling of a moment before it quietly becomes a memory. The way someone looks at the person they love, the laughter that happens in between poses, the happy tears, the wind in your hair, the little moments you didn't even realize were happening. Those are the moments I live for.",
+    "My faith is also a huge part of who I am and the way I see the world. I believe every person is created with incredible value and every season of life is a gift worth remembering. That perspective shapes the way I photograph my clients. My prayer is that the people who step in front of my camera feel seen, loved, and leave with memories they'll cherish for years to come.",
+    "Outside of photography, your girl is a musical theater lover. You'll usually find me at a musical theater production or exploring anything that lets creativity come to life. I've always been drawn to the arts, and I believe every creative expression tells a story in its own beautiful way. That love for storytelling is what inspires me behind the camera and helps me create photographs that don't just capture how a moment looked, but how it truly felt.",
+    "Thank you for considering me to tell your story. I can't wait to create something timeless together memories you'll be able to hold onto for years to come.",
+    "With love,",
   ],
+  signature: "Carla Santos ♡",
 };
 
 export const statsContent = {
@@ -110,7 +115,7 @@ export const statsContent = {
     {
       id: "years",
       value: 7,
-      displayValue: "7",
+      displayValue: "7+",
       label: "Years of Experience",
     },
     {
@@ -121,14 +126,14 @@ export const statsContent = {
     },
     {
       id: "clients",
-      value: 300,
-      displayValue: "300+",
+      value: 200,
+      displayValue: "200+",
       label: "# of Clients",
     },
     {
       id: "cities",
-      value: 12,
-      displayValue: "12",
+      value: 60,
+      displayValue: "60+",
       label: "Cities Traveled",
     },
   ],
@@ -176,9 +181,16 @@ export const contactContent = {
     },
   ],
   socialLinks: [
-    { label: "Instagram", shortLabel: "IG", href: "https://instagram.com" },
-    { label: "Facebook", shortLabel: "FB", href: "https://facebook.com" },
-    { label: "TikTok", shortLabel: "TT", href: "https://tiktok.com" },
+    {
+      label: "Instagram",
+      shortLabel: "IG",
+      href: "https://www.instagram.com/capturedbycarlas/",
+    },
+    {
+      label: "TikTok",
+      shortLabel: "TT",
+      href: "https://www.tiktok.com/@capturedbycarlas",
+    },
   ],
   formFields: [
     { id: "contact-name", label: "Name", type: "text" },
@@ -191,7 +203,7 @@ export const contactContent = {
     { label: "About", href: "/#about" },
     { label: "Portfolio", href: "/portfolio" },
     { label: "Investment", href: "/investment" },
-    { label: "FAQ", href: "/#faq" },
+    { label: "FAQ", href: "/faq" },
     { label: "Contact", href: "/#contact" },
   ],
 };

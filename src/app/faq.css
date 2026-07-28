@@ -1,0 +1,193 @@
+/* FAQ page */
+.faq-page {
+  background: var(--sand);
+}
+
+.faq-hero {
+  margin: 0 auto;
+  max-width: 1040px;
+  padding: clamp(78px, 9vw, 128px) clamp(20px, 5vw, 72px)
+    clamp(34px, 5vw, 62px);
+  text-align: center;
+}
+
+.faq-eyebrow {
+  align-items: baseline;
+  display: inline-flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.faq-eyebrow-script {
+  /* Reuse the same script font used for "me" and "Carla Santos." */
+  color: var(--dusty-olive);
+  font-family: var(--font-script), "Brush Script MT", cursive;
+  font-size: 1.55rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: lowercase;
+}
+
+.faq-hero h1 {
+  color: var(--walnut);
+  font-size: clamp(3.2rem, 7vw, 6.8rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 0.92;
+  margin: 18px auto 0;
+  max-width: 900px;
+  text-transform: none;
+}
+
+.faq-hero p:not(.section-eyebrow) {
+  color: var(--walnut);
+  font-size: clamp(1.08rem, 1.8vw, 1.28rem);
+  line-height: 1.6;
+  margin: 24px auto 0;
+  max-width: 660px;
+}
+
+.faq-lace-strip {
+  /*
+    This repeats the same lace artwork used on the homepage and Investment page,
+    so the FAQ page feels like part of the same visual system.
+  */
+  background-image: url("/images/design.png?v=1");
+  background-position: left top;
+  background-repeat: repeat-x;
+  background-size: auto 46px;
+  filter: brightness(0) saturate(100%) invert(42%) sepia(9%)
+    saturate(693%) hue-rotate(31deg) brightness(91%) contrast(87%);
+  height: 46px;
+  margin: clamp(28px, 4vw, 44px) auto 0;
+  max-width: 960px;
+}
+
+.faq-section {
+  padding: 0 clamp(18px, 5vw, 72px) clamp(82px, 10vw, 140px);
+}
+
+.faq-accordion {
+  display: grid;
+  gap: 16px;
+  margin: 0 auto;
+  max-width: 960px;
+}
+
+.faq-item {
+  background: var(--warm-beige);
+  border: 1px solid rgba(var(--text-rgb), 0.12);
+  border-radius: 28px;
+  box-shadow: 0 18px 42px rgba(var(--text-rgb), 0.06);
+  overflow: hidden;
+  transition:
+    border-color 220ms ease-out,
+    box-shadow 240ms ease-out,
+    transform 240ms ease-out;
+}
+
+.faq-item:hover,
+.faq-item.is-open {
+  border-color: rgba(var(--text-rgb), 0.22);
+  box-shadow: 0 24px 54px rgba(var(--text-rgb), 0.1);
+}
+
+.faq-item:hover {
+  transform: translateY(-3px);
+}
+
+.faq-question {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--walnut);
+  cursor: pointer;
+  display: flex;
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  font-weight: 600;
+  gap: 24px;
+  justify-content: space-between;
+  line-height: 1.15;
+  padding: clamp(22px, 4vw, 34px);
+  text-align: left;
+  width: 100%;
+}
+
+.faq-question:hover {
+  color: var(--dusty-olive);
+}
+
+.faq-icon {
+  align-items: center;
+  border: 1px solid rgba(var(--text-rgb), 0.28);
+  border-radius: 999px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 1.2rem;
+  height: 36px;
+  justify-content: center;
+  line-height: 1;
+  transition:
+    background-color 200ms ease-out,
+    border-color 200ms ease-out,
+    color 200ms ease-out,
+    transform 220ms ease-out;
+  width: 36px;
+}
+
+.faq-item.is-open .faq-icon {
+  background: var(--clay);
+  border-color: var(--clay);
+  color: var(--sand);
+  transform: rotate(45deg);
+}
+
+.faq-answer-wrap {
+  /*
+    CSS grid makes a smooth accordion animation without measuring height in JS.
+    Closed = 0fr, open = 1fr.
+  */
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 260ms ease-out;
+}
+
+.faq-item.is-open .faq-answer-wrap {
+  grid-template-rows: 1fr;
+}
+
+.faq-answer {
+  overflow: hidden;
+}
+
+.faq-answer p {
+  border-top: 1px solid rgba(var(--text-rgb), 0.12);
+  color: var(--walnut);
+  font-size: clamp(1.05rem, 1.8vw, 1.22rem);
+  line-height: 1.65;
+  margin: 0 clamp(22px, 4vw, 34px) clamp(24px, 4vw, 34px);
+  opacity: 0;
+  padding-top: clamp(18px, 3vw, 26px);
+  transform: translateY(-6px);
+  transition:
+    opacity 220ms ease-out,
+    transform 220ms ease-out;
+}
+
+.faq-item.is-open .faq-answer p {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .faq-question {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .faq-icon {
+    height: 32px;
+    width: 32px;
+  }
+}

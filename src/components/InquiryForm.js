@@ -10,7 +10,7 @@ export default function InquiryForm({ categories }) {
   const [dateInput, setDateInput] = useState("");
   const [selectedDates, setSelectedDates] = useState([]);
   const [foundMe, setFoundMe] = useState("Instagram");
-  const foundMeOptions = ["Instagram", "TikTok", "Facebook", "Word of Mouth", "Other"];
+  const foundMeOptions = ["Instagram", "TikTok", "Word of Mouth", "Other"];
 
   const activeCategory =
     categories.find((category) => category.id === sessionType) || categories[0];
@@ -181,11 +181,6 @@ export default function InquiryForm({ categories }) {
           <label>
             <span>TikTok</span>
             <input name="tiktok" placeholder="@username" type="text" />
-          </label>
-
-          <label>
-            <span>Facebook</span>
-            <input name="facebook" placeholder="Profile name" type="text" />
           </label>
         </div>
       </fieldset>

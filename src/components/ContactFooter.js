@@ -11,7 +11,7 @@ export default function ContactFooter({ content }) {
           {/* This small note points visitors back to the future FAQ area. */}
           <p className="contact-faq-note">
             {content.faqText}
-            <a href="#faq">{content.faqLinkLabel}</a>!
+            <a href="/faq">{content.faqLinkLabel}</a>!
           </p>
 
           <h2 id="contact-heading">{content.heading}</h2>

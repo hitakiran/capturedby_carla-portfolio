@@ -76,8 +76,8 @@ export default function StatsSection({ content }) {
       return stat.displayValue;
     }
 
-    // While counting, keep helpful suffixes visible so numbers like 300+
-    // visibly animate as 42+, 180+, 300+ instead of plain 42, 180, 300.
+    // While counting, keep helpful suffixes visible so numbers with +
+    // visibly animate with the same final style.
     if (stat.displayValue.includes("K")) {
       return `${currentNumber}K`;
     }
@@ -90,14 +90,22 @@ export default function StatsSection({ content }) {
   }
 
   return (
-    <section className="stats-section" ref={sectionRef} aria-labelledby="stats-heading">
+    <section
+      className={`stats-section reveal-stagger-group${hasAnimated ? " is-visible" : ""}`}
+      ref={sectionRef}
+      aria-labelledby="stats-heading"
+    >
       <div className="stats-inner">
         {/* The heading now stands alone, with no eyebrow text above it. */}
         <h2 id="stats-heading">{content.heading}</h2>
 
         <div className="stats-grid">
           {content.stats.map((stat, index) => (
-            <article className="stat-card" key={stat.id}>
+            <article
+              className="stat-card reveal-stagger-item"
+              key={stat.id}
+              style={{ "--reveal-index": index }}
+            >
               <strong>{getDisplayNumber(stat, index)}</strong>
               <span>{stat.label}</span>
             </article>

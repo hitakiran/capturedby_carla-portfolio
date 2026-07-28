@@ -1,4 +1,5 @@
 import InquiryForm from "@/components/InquiryForm";
+import RevealOnScroll from "@/components/RevealOnScroll";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { contactContent, heroContent, navLinks } from "@/data/homepage";
@@ -17,17 +18,27 @@ export default function InquiryPage() {
     <main className="inquiry-page" id="top">
       <SiteHeader navLinks={navLinks} navLogo={heroContent.navLogo} />
 
-      <section className="inquiry-hero" aria-labelledby="inquiry-heading">
+      <RevealOnScroll
+        as="section"
+        className="inquiry-hero"
+        aria-labelledby="inquiry-heading"
+      >
         <h1 id="inquiry-heading">Inquiry Form</h1>
         {/* Same lace artwork used elsewhere, repeated so it stays crisp. */}
         <div className="inquiry-lace-strip" aria-hidden="true" />
-      </section>
+      </RevealOnScroll>
 
-      <section className="inquiry-form-section" aria-label="Photography inquiry form">
+      <RevealOnScroll
+        as="section"
+        className="inquiry-form-section"
+        aria-label="Photography inquiry form"
+      >
         <InquiryForm categories={inquiryCategories} />
-      </section>
+      </RevealOnScroll>
 
-      <SiteFooter content={contactContent} />
+      <RevealOnScroll>
+        <SiteFooter content={contactContent} />
+      </RevealOnScroll>
     </main>
   );
 }

@@ -4,9 +4,8 @@ import SocialIcon from "@/components/SocialIcon";
 // Social links shown at the bottom of the portfolio sidebar.
 // These are placeholders for now, so Carla's real profile URLs can be added later.
 const socialLinks = [
-  { label: "Instagram", href: "https://instagram.com/" },
-  { label: "Facebook", href: "https://facebook.com/" },
-  { label: "TikTok", href: "https://tiktok.com/" },
+  { label: "Instagram", href: "https://www.instagram.com/capturedbycarlas/" },
+  { label: "TikTok", href: "https://www.tiktok.com/@capturedbycarlas" },
 ];
 
 function getCategoryLabel(category) {
@@ -63,10 +62,10 @@ export default function Sidebar({
         <nav className="grid gap-4" aria-label="Portfolio categories">
           {sidebarCategories.map((category) => (
             <button
-              className={`group flex items-center justify-between border-b border-transparent py-2 text-left text-sm font-bold uppercase tracking-[0.18em] transition-all duration-200 ease-out ${
+              className={`group flex items-center justify-between rounded-full border px-4 py-3 text-left text-sm font-bold uppercase tracking-[0.18em] shadow-none transition-all duration-200 ease-out hover:-translate-y-1 hover:scale-[1.03] hover:shadow-[0_12px_24px_rgba(70,60,50,0.10)] ${
                 activeCategory === category
-                  ? "border-[var(--walnut)] text-[var(--walnut)]"
-                  : "text-[rgba(var(--text-rgb),0.62)] hover:border-[rgba(var(--text-rgb),0.42)] hover:text-[var(--walnut)]"
+                  ? "border-[rgba(var(--text-rgb),0.22)] bg-[var(--section-alternate)] text-[var(--walnut)]"
+                  : "border-transparent text-[rgba(var(--text-rgb),0.62)] hover:border-[rgba(var(--text-rgb),0.18)] hover:bg-[var(--section-alternate)] hover:text-[var(--walnut)]"
               }`}
               key={category}
               onClick={() => onCategoryChange(category)}
@@ -85,7 +84,7 @@ export default function Sidebar({
 
         <nav className="grid gap-4" aria-label="Portfolio links">
           <Link
-            className="w-fit border-b border-transparent py-2 text-sm font-bold uppercase tracking-[0.18em] text-[rgba(var(--text-rgb),0.62)] transition-all duration-200 ease-out hover:border-[var(--walnut)] hover:text-[var(--walnut)]"
+            className="w-fit rounded-full border border-transparent px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[rgba(var(--text-rgb),0.62)] transition-all duration-200 ease-out hover:-translate-y-1 hover:scale-[1.03] hover:border-[rgba(var(--text-rgb),0.18)] hover:bg-[var(--section-alternate)] hover:text-[var(--walnut)] hover:shadow-[0_12px_24px_rgba(70,60,50,0.10)]"
             href="/#contact"
           >
             Contact

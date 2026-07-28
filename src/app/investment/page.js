@@ -1,4 +1,5 @@
 import InvestmentPackages from "@/components/InvestmentPackages";
+import RevealOnScroll from "@/components/RevealOnScroll";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { contactContent, heroContent, navLinks } from "@/data/homepage";
@@ -14,18 +15,26 @@ export default function InvestmentPage() {
     <main className="site-shell investment-page" id="top">
       <SiteHeader navLinks={navLinks} navLogo={heroContent.navLogo} />
 
-      <section className="investment-hero" aria-labelledby="investment-heading">
+      <RevealOnScroll
+        as="section"
+        className="investment-hero"
+        aria-labelledby="investment-heading"
+      >
         <p className="section-eyebrow">Investment</p>
         <h1 id="investment-heading">Choose the story you want documented.</h1>
         <p>
-          Placeholder packages for brands, portraits, couples, weddings, and families.
-          Carla&apos;s real pricing can replace these details later.
+          Every session is tailored to you — explore the collections below to find the
+          experience that fits your story.
         </p>
-      </section>
+      </RevealOnScroll>
 
-      <InvestmentPackages categories={investmentCategories} />
+      <RevealOnScroll>
+        <InvestmentPackages categories={investmentCategories} />
+      </RevealOnScroll>
 
-      <SiteFooter content={contactContent} />
+      <RevealOnScroll>
+        <SiteFooter content={contactContent} />
+      </RevealOnScroll>
     </main>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import GalleryGrid from "@/components/portfolio/GalleryGrid";
+import RevealOnScroll from "@/components/RevealOnScroll";
 import Sidebar from "@/components/portfolio/Sidebar";
 
 // PortfolioGallery controls which category is selected and passes the filtered
@@ -9,6 +10,7 @@ import Sidebar from "@/components/portfolio/Sidebar";
 export default function PortfolioGallery({ categories, heading, intro, photos }) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const hasIntroHeader = heading || intro;
 
   const filteredPhotos = useMemo(() => {
     if (activeCategory === "All") {
@@ -34,17 +36,25 @@ export default function PortfolioGallery({ categories, heading, intro, photos })
       />
 
       <main className="px-5 py-12 sm:px-8 lg:col-start-2 lg:px-12 lg:py-16 xl:px-16">
-        <header className="mb-12 max-w-4xl">
-          <p className="section-eyebrow">Portfolio</p>
-          <h1 className="mt-4 max-w-4xl text-5xl font-medium uppercase leading-[0.92] tracking-[0.01em] text-[var(--walnut)] sm:text-6xl xl:text-7xl">
-            {heading}
-          </h1>
-          <p className="mt-6 max-w-2xl text-xl leading-relaxed text-[var(--walnut)]">
-            {intro}
-          </p>
-        </header>
+        {hasIntroHeader && (
+          <header className="mb-12 max-w-4xl">
+            <p className="section-eyebrow">Portfolio</p>
+            {heading && (
+              <h1 className="mt-4 max-w-4xl text-5xl font-medium uppercase leading-[0.92] tracking-[0.01em] text-[var(--walnut)] sm:text-6xl xl:text-7xl">
+                {heading}
+              </h1>
+            )}
+            {intro && (
+              <p className="mt-6 max-w-2xl text-xl leading-relaxed text-[var(--walnut)]">
+                {intro}
+              </p>
+            )}
+          </header>
+        )}
 
-        <GalleryGrid photos={filteredPhotos} />
+        <RevealOnScroll>
+          <GalleryGrid photos={filteredPhotos} />
+        </RevealOnScroll>
       </main>
     </div>
   );
