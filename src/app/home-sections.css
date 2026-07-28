@@ -219,6 +219,10 @@
   transition: transform 220ms ease-out;
 }
 
+.review-star-empty {
+  color: rgba(var(--text-rgb), 0.22);
+}
+
 .review-card:hover .review-stars span {
   transform: translateY(-2px) scale(1.06);
 }

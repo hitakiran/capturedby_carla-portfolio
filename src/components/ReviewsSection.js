@@ -2,6 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
+function getSafeRating(rating) {
+  const numericRating = Number(rating) || 5;
+  return Math.min(Math.max(numericRating, 1), 5);
+}
+
 // This component is a Client Component because the review row moves
 // automatically every few seconds.
 export default function ReviewsSection({ content }) {
@@ -104,9 +109,16 @@ export default function ReviewsSection({ content }) {
                 key={`${review.id}-${index}`}
                 style={{ "--reveal-index": index % reviews.length }}
               >
-                <div className="review-stars" aria-label="5 out of 5 stars">
+                <div
+                  className="review-stars"
+                  aria-label={`${getSafeRating(review.rating)} out of 5 stars`}
+                >
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <span aria-hidden="true" key={star}>
+                    <span
+                      aria-hidden="true"
+                      className={star > getSafeRating(review.rating) ? "review-star-empty" : ""}
+                      key={star}
+                    >
                       ★
                     </span>
                   ))}

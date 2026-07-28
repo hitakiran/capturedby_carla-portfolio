@@ -38,12 +38,84 @@ function getCategoryPhotos(portfolioImages, categoryName, fallbackPhotos) {
   return matchingPhotos;
 }
 
-async function getHomepageImageData() {
+function getContentValue(siteContentRows, sectionKey, fallbackValue) {
+  const matchingRow = siteContentRows.find((row) => row.section_key === sectionKey);
+
+  // If a row is missing or blank, keep the hardcoded fallback so the page
+  // never shows an empty section by accident.
+  return matchingRow?.value?.trim() || fallbackValue;
+}
+
+function getContentNumber(siteContentRows, sectionKey, fallbackNumber) {
+  const savedValue = getContentValue(siteContentRows, sectionKey, String(fallbackNumber));
+  const numericValue = Number.parseInt(savedValue.replace(/[^0-9]/g, ""), 10);
+
+  if (Number.isNaN(numericValue)) {
+    return fallbackNumber;
+  }
+
+  return numericValue;
+}
+
+function formatPlusNumber(numberValue) {
+  // The number comes from Supabase, while the "+" stays hardcoded here.
+  return `${numberValue.toLocaleString()}+`;
+}
+
+function sortTestimonials(testimonials) {
+  return [...testimonials].sort((firstTestimonial, secondTestimonial) => {
+    const firstHasOrder = typeof firstTestimonial.display_order === "number";
+    const secondHasOrder = typeof secondTestimonial.display_order === "number";
+
+    // Use display_order first when the admin has set it.
+    if (firstHasOrder && secondHasOrder) {
+      return firstTestimonial.display_order - secondTestimonial.display_order;
+    }
+
+    if (firstHasOrder) {
+      return -1;
+    }
+
+    if (secondHasOrder) {
+      return 1;
+    }
+
+    // If display_order is blank, fall back to created_at.
+    return (
+      new Date(firstTestimonial.created_at || 0) -
+      new Date(secondTestimonial.created_at || 0)
+    );
+  });
+}
+
+function getLiveReviews(testimonials, fallbackReviews) {
+  if (testimonials.length === 0) {
+    return fallbackReviews;
+  }
+
+  return sortTestimonials(testimonials).map((testimonial) => ({
+    id: testimonial.id,
+    name: testimonial.client_name || "Client",
+    rating: testimonial.rating || 5,
+    text: testimonial.testimonial_text || "",
+  }));
+}
+
+async function getHomepageData() {
   const supabase = await createClient();
   const categoryNames = categoryShowcase.map((category) => category.category);
 
-  // These two queries only fetch public image data. Decorative design files stay local.
-  const [siteImagesResult, portfolioImagesResult] = await Promise.all([
+  // These queries only fetch public page data. Decorative design files stay local.
+  const [
+    siteContentResult,
+    siteImagesResult,
+    portfolioImagesResult,
+    testimonialsResult,
+  ] = await Promise.all([
+    supabase
+      .from("site_content")
+      .select("id, page, section_key, value, updated_at")
+      .eq("page", "home"),
     supabase
       .from("site_images")
       .select("id, page, image_key, image_url")
@@ -54,16 +126,22 @@ async function getHomepageImageData() {
       .select("id, category, image_url, created_at")
       .in("category", categoryNames)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("testimonials")
+      .select("id, client_name, testimonial_text, rating, display_order, created_at")
+      .order("created_at", { ascending: true }),
   ]);
 
   return {
+    siteContent: siteContentResult.data || [],
     siteImages: siteImagesResult.data || [],
     portfolioImages: portfolioImagesResult.data || [],
+    testimonials: testimonialsResult.data || [],
   };
 }
 
 export default async function Home() {
-  const { siteImages, portfolioImages } = await getHomepageImageData();
+  const { siteContent, siteImages, portfolioImages, testimonials } = await getHomepageData();
 
   const liveHeroContent = {
     ...heroContent,
@@ -73,12 +151,45 @@ export default async function Home() {
   const liveAboutContent = {
     ...aboutContent,
     image_url: getSiteImageUrl(siteImages, "about_portrait", aboutContent.image_url),
+    // The heading and signature intentionally remain hardcoded above/below this text.
+    paragraphs: [
+      getContentValue(siteContent, "about_intro", aboutContent.paragraphs[0]),
+      getContentValue(siteContent, "about_paragraph_1", aboutContent.paragraphs[1]),
+      getContentValue(siteContent, "about_paragraph_2", aboutContent.paragraphs[2]),
+      getContentValue(siteContent, "about_paragraph_3", aboutContent.paragraphs[3]),
+      getContentValue(siteContent, "about_paragraph_4", aboutContent.paragraphs[4]),
+      getContentValue(siteContent, "about_closing", aboutContent.paragraphs[5]),
+    ],
   };
 
   const liveCategoryShowcase = categoryShowcase.map((category) => ({
     ...category,
     photos: getCategoryPhotos(portfolioImages, category.category, category.photos),
   }));
+
+  const liveReviewsContent = {
+    ...reviewsContent,
+    reviews: getLiveReviews(testimonials, reviewsContent.reviews),
+  };
+
+  const liveStatsContent = {
+    ...statsContent,
+    stats: statsContent.stats.map((stat) => {
+      const statSectionKeys = {
+        years: "stats_years_number",
+        photos: "stats_photos_number",
+        clients: "stats_clients_number",
+        cities: "stats_cities_number",
+      };
+      const liveValue = getContentNumber(siteContent, statSectionKeys[stat.id], stat.value);
+
+      return {
+        ...stat,
+        value: liveValue,
+        displayValue: formatPlusNumber(liveValue),
+      };
+    }),
+  };
 
   return (
     <main className="site-shell" id="top">
@@ -195,7 +306,7 @@ export default async function Home() {
 
       {/* Section 4: simple animated proof points for social trust. */}
       <RevealOnScroll>
-        <StatsSection content={statsContent} />
+        <StatsSection content={liveStatsContent} />
       </RevealOnScroll>
 
       {/* Small scrolling brand strip between stats and reviews. */}
@@ -203,7 +314,7 @@ export default async function Home() {
 
       {/* Section 5: rotating placeholder reviews from future clients. */}
       <RevealOnScroll>
-        <ReviewsSection content={reviewsContent} />
+        <ReviewsSection content={liveReviewsContent} />
       </RevealOnScroll>
 
       {/* Section 6: contact form UI and footer navigation. */}

@@ -24,6 +24,9 @@ export default function AdminLayout({ children }) {
               <Link className="transition hover:text-stone-900" href="/admin/site-images">
                 Site Images
               </Link>
+              <Link className="transition hover:text-stone-900" href="/admin/testimonials">
+                Testimonials
+              </Link>
             </nav>
           </div>
           <LogoutButton />
