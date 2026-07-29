@@ -13,6 +13,7 @@ export default function InquiryForm({ categories }) {
   const [dateInput, setDateInput] = useState("");
   const [formMessage, setFormMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [selectedDates, setSelectedDates] = useState([]);
   const [foundMe, setFoundMe] = useState("Instagram");
   const foundMeOptions = ["Instagram", "TikTok", "Word of Mouth", "Other"];
@@ -112,11 +113,22 @@ export default function InquiryForm({ categories }) {
       setSessionType(categories[0].id);
       setSelectedPackage(categories[0].packages[0].id);
       setFormMessage(result.message || SUCCESS_MESSAGE);
+      setIsSubmitted(true);
     } catch (error) {
       setFormMessage(error.message);
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (isSubmitted) {
+    return (
+      <div className="form-success-card inquiry-success-state" role="status" aria-live="polite">
+        <span className="form-success-icon" aria-hidden="true" />
+        <h2>Inquiry received</h2>
+        <p>{formMessage || SUCCESS_MESSAGE}</p>
+      </div>
+    );
   }
 
   return (

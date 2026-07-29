@@ -12,6 +12,7 @@ const SUCCESS_MESSAGE =
 export default function ContactFooter({ content }) {
   const [formMessage, setFormMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   function getFormValue(formData, fieldName) {
     // This helper turns empty fields into clean strings before we send them.
@@ -55,6 +56,7 @@ export default function ContactFooter({ content }) {
 
       form.reset();
       setFormMessage(result.message || SUCCESS_MESSAGE);
+      setIsSubmitted(true);
     } catch (error) {
       setFormMessage(error.message);
     } finally {
@@ -105,25 +107,33 @@ export default function ContactFooter({ content }) {
               </div>
             </div>
 
-            <form className="contact-form" onSubmit={handleContactSubmit}>
-              {content.formFields.map((field) => (
-                <label key={field.id}>
-                  <span>{field.label}</span>
-                  <input id={field.id} name={field.id} type={field.type} />
+            {isSubmitted ? (
+              <div className="form-success-card contact-success-card" role="status" aria-live="polite">
+                <span className="form-success-icon" aria-hidden="true" />
+                <h3>Message received</h3>
+                <p>{formMessage || SUCCESS_MESSAGE}</p>
+              </div>
+            ) : (
+              <form className="contact-form" onSubmit={handleContactSubmit}>
+                {content.formFields.map((field) => (
+                  <label key={field.id}>
+                    <span>{field.label}</span>
+                    <input id={field.id} name={field.id} type={field.type} />
+                  </label>
+                ))}
+
+                <label>
+                  <span>Message</span>
+                  <textarea id="contact-message" name="contact-message" rows="6" />
                 </label>
-              ))}
 
-              <label>
-                <span>Message</span>
-                <textarea id="contact-message" name="contact-message" rows="6" />
-              </label>
+                {formMessage && <p className="form-submit-message">{formMessage}</p>}
 
-              {formMessage && <p className="form-submit-message">{formMessage}</p>}
-
-              <button className="text-button" disabled={isSubmitting} type="submit">
-                {isSubmitting ? "Submitting..." : "Submit"}
-              </button>
-            </form>
+                <button className="text-button" disabled={isSubmitting} type="submit">
+                  {isSubmitting ? "Submitting..." : "Submit"}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </section>

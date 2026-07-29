@@ -891,6 +891,70 @@ a {
   padding: 12px 14px;
 }
 
+/*
+  This shared success card replaces the full form after a successful submit.
+  It keeps the page clean so visitors only see the confirmation message.
+*/
+.form-success-card {
+  align-items: center;
+  background: rgba(var(--background-rgb), 0.72);
+  border: 1px solid rgba(var(--text-rgb), 0.18);
+  border-radius: 28px;
+  box-shadow: 0 22px 44px rgba(var(--text-rgb), 0.1);
+  color: var(--walnut);
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  margin: 0 auto;
+  max-width: 620px;
+  padding: clamp(34px, 6vw, 58px);
+  text-align: center;
+}
+
+.form-success-card h2,
+.form-success-card h3 {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  font-size: clamp(2.1rem, 6vw, 4.4rem);
+  font-weight: 400;
+  line-height: 0.95;
+  margin: 0;
+  text-transform: none;
+}
+
+.form-success-card p {
+  font-size: clamp(1.02rem, 2vw, 1.2rem);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 520px;
+}
+
+/*
+  The checkmark is drawn with CSS so we do not need another image file.
+*/
+.form-success-icon {
+  align-items: center;
+  background: var(--clay);
+  border-radius: 999px;
+  display: inline-flex;
+  height: 54px;
+  justify-content: center;
+  position: relative;
+  width: 54px;
+}
+
+.form-success-icon::after {
+  border-bottom: 3px solid var(--background);
+  border-right: 3px solid var(--background);
+  content: "";
+  height: 18px;
+  transform: translateY(-2px) rotate(45deg);
+  width: 10px;
+}
+
+.contact-success-card {
+  align-self: center;
+}
+
 .section-eyebrow {
   color: var(--dusty-olive);
   font-size: 0.78rem;
