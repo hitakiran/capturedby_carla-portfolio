@@ -18,6 +18,12 @@ export default function AdminLayout({ children }) {
               <Link className="transition hover:text-stone-900" href="/admin">
                 Content
               </Link>
+              <Link className="transition hover:text-stone-900" href="/admin/investment">
+                Investment
+              </Link>
+              <Link className="transition hover:text-stone-900" href="/admin/faq">
+                FAQ
+              </Link>
               <Link className="transition hover:text-stone-900" href="/admin/portfolio">
                 Photos
               </Link>

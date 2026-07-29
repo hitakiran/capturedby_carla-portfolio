@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 
+const SUCCESS_MESSAGE =
+  "Thank you for reaching out! Please check your email, including your spam or junk folder just in case, for a confirmation from me.";
+
 // InquiryForm is a Client Component because it shows/hides fields based on
 // the visitor's choices.
 export default function InquiryForm({ categories }) {
   const [sessionType, setSessionType] = useState(categories[0].id);
   const [selectedPackage, setSelectedPackage] = useState(categories[0].packages[0].id);
   const [dateInput, setDateInput] = useState("");
+  const [formMessage, setFormMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDates, setSelectedDates] = useState([]);
   const [foundMe, setFoundMe] = useState("Instagram");
   const foundMeOptions = ["Instagram", "TikTok", "Word of Mouth", "Other"];
@@ -38,10 +43,80 @@ export default function InquiryForm({ categories }) {
     setSelectedDates(selectedDates.filter((date) => date !== dateToRemove));
   }
 
-  function handleSubmit(event) {
-    // This prevents the browser from refreshing the page.
-    // Real submit logic can be added later when Supabase or email is connected.
+  function getFormValue(formData, fieldName) {
+    // FormData can return null if a field is blank, so this helper keeps
+    // every answer safe and easy to send to the server.
+    return String(formData.get(fieldName) || "").trim();
+  }
+
+  async function handleSubmit(event) {
+    // This prevents the browser from refreshing the page while we submit with fetch().
     event.preventDefault();
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const selectedPackageName =
+      activeCategory.packages.find((packageItem) => packageItem.id === selectedPackage)?.name ||
+      selectedPackage;
+
+    const answers = [
+      { label: "First Name(s)", value: getFormValue(formData, "firstNames") },
+      { label: "Last Name(s)", value: getFormValue(formData, "lastNames") },
+      { label: "Email", value: getFormValue(formData, "email") },
+      { label: "Phone", value: getFormValue(formData, "phone") },
+      { label: "Session Type", value: activeCategory.formLabel || activeCategory.name },
+      { label: "Package of Interest", value: selectedPackageName },
+      { label: "Desired Photoshoot Dates", value: selectedDates },
+      { label: "Additional Date Notes", value: getFormValue(formData, "dateNotes") },
+      { label: "Morning or Evening Availability", value: getFormValue(formData, "availability") },
+      { label: "Preferred Time", value: getFormValue(formData, "preferredTime") },
+      { label: "Location", value: getFormValue(formData, "location") },
+      { label: "Vision", value: getFormValue(formData, "vision") },
+      { label: "Pinterest Board", value: getFormValue(formData, "pinterest") },
+      { label: "Instagram", value: getFormValue(formData, "instagram") },
+      { label: "TikTok", value: getFormValue(formData, "tiktok") },
+      { label: "Where They Found Carla", value: foundMe },
+      { label: "Other Referral Details", value: getFormValue(formData, "foundMeOther") },
+    ];
+
+    setFormMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/form-submissions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          formType: "Inquiry",
+          clientName: `${getFormValue(formData, "firstNames")} ${getFormValue(
+            formData,
+            "lastNames",
+          )}`.trim(),
+          clientEmail: getFormValue(formData, "email"),
+          answers,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Something went wrong. Please try again.");
+      }
+
+      form.reset();
+      setSelectedDates([]);
+      setDateInput("");
+      setFoundMe("Instagram");
+      setSessionType(categories[0].id);
+      setSelectedPackage(categories[0].packages[0].id);
+      setFormMessage(result.message || SUCCESS_MESSAGE);
+    } catch (error) {
+      setFormMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -210,8 +285,10 @@ export default function InquiryForm({ categories }) {
         )}
       </fieldset>
 
-      <button className="text-button inquiry-submit-button" type="submit">
-        Submit
+      {formMessage && <p className="form-submit-message">{formMessage}</p>}
+
+      <button className="text-button inquiry-submit-button" disabled={isSubmitting} type="submit">
+        {isSubmitting ? "Submitting..." : "Submit"}
       </button>
     </form>
   );

@@ -3,48 +3,33 @@ import RevealOnScroll from "@/components/RevealOnScroll";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { contactContent, heroContent, navLinks } from "@/data/homepage";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: "FAQ | Carla Santos Photography",
   description: "Frequently asked questions for Captured by Carla photography sessions.",
 };
 
-// Placeholder FAQ content for now.
-// Later, these objects can be replaced with rows from Supabase or another database.
-const faqItems = [
-  {
-    question: "Do you travel for sessions?",
-    answer:
-      "Yes. Carla photographs sessions throughout the Bay Area and beyond. Travel fees may apply depending on the location, but those details can be discussed during your inquiry.",
-  },
-  {
-    question: "What is included in a session?",
-    answer:
-      "Each session includes planning guidance, photography time, edited digital images, and an online gallery. The exact number of images and session length depends on the package you choose.",
-  },
-  {
-    question: "How far in advance should I book?",
-    answer:
-      "For portraits, couples, families, and brand sessions, booking at least 4 to 8 weeks ahead is helpful. Weddings and larger events should be booked earlier whenever possible.",
-  },
-  {
-    question: "Can you help with location ideas?",
-    answer:
-      "Absolutely. Carla can suggest locations based on the feeling you want for your photos, whether that is romantic, editorial, playful, cozy, or natural.",
-  },
-  {
-    question: "What should I wear for my photoshoot?",
-    answer:
-      "Neutral tones, textures, and outfits that feel like you usually photograph beautifully. Styling notes can be shared before your session so everything feels intentional and comfortable.",
-  },
-  {
-    question: "When will I receive my gallery?",
-    answer:
-      "Turnaround time depends on the session type and season. Placeholder timing for now is 2 to 4 weeks for most sessions, with wedding galleries taking longer.",
-  },
-];
+async function getFaqItems() {
+  const supabase = await createClient();
 
-export default function FaqPage() {
+  // The public FAQ page only shows rows Carla has marked active.
+  const { data, error } = await supabase
+    .from("faq_items")
+    .select("id, question, answer, display_order, is_active")
+    .eq("is_active", true)
+    .order("display_order", { ascending: true });
+
+  if (error) {
+    return [];
+  }
+
+  return data || [];
+}
+
+export default async function FaqPage() {
+  const faqItems = await getFaqItems();
+
   return (
     <main className="site-shell faq-page" id="top">
       <SiteHeader navLinks={navLinks} navLogo={heroContent.navLogo} />
@@ -64,7 +49,11 @@ export default function FaqPage() {
         className="faq-section"
         aria-label="Frequently asked questions accordion"
       >
-        <FaqAccordion items={faqItems} />
+        {faqItems.length > 0 ? (
+          <FaqAccordion items={faqItems} />
+        ) : (
+          <p className="faq-empty-state">FAQs coming soon</p>
+        )}
       </RevealOnScroll>
 
       <RevealOnScroll>

@@ -22,7 +22,7 @@ export default function FaqAccordion({ items }) {
         const answerId = `faq-answer-${index}`;
 
         return (
-          <article className={`faq-item${isOpen ? " is-open" : ""}`} key={item.question}>
+          <article className={`faq-item${isOpen ? " is-open" : ""}`} key={item.id || item.question}>
             <button
               aria-controls={answerId}
               aria-expanded={isOpen}

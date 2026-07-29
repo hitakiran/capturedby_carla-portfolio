@@ -3,6 +3,25 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+function getStartingPrice(packageItem) {
+  // New Supabase-backed packages store only the number, like 295.
+  if (
+    packageItem.startingPrice !== null &&
+    packageItem.startingPrice !== undefined &&
+    packageItem.startingPrice !== ""
+  ) {
+    return Number(packageItem.startingPrice).toLocaleString();
+  }
+
+  // Old placeholder packages stored text like "begins at $295" or "$325".
+  // This fallback strips that old wording so the design can keep "begins at"
+  // and "$" hardcoded in the component.
+  return String(packageItem.price || "")
+    .replace("begins at", "")
+    .replace("$", "")
+    .trim();
+}
+
 // InvestmentPackages is a Client Component because the tabs change the
 // selected package category and read the URL hash, like /investment#couples.
 export default function InvestmentPackages({ categories }) {
@@ -78,20 +97,14 @@ export default function InvestmentPackages({ categories }) {
               </div>
 
               <ul>
-                {packageItem.includes.map((includedItem) => (
+                {(packageItem.includes || []).map((includedItem) => (
                   <li key={includedItem}>{includedItem}</li>
                 ))}
               </ul>
 
               <strong className="investment-package-price">
-                {packageItem.price.startsWith("begins at ") ? (
-                  <>
-                    <span>begins at</span>
-                    <span>{packageItem.price.replace("begins at ", "")}</span>
-                  </>
-                ) : (
-                  <span>{packageItem.price}</span>
-                )}
+                <span>begins at</span>
+                <span>${getStartingPrice(packageItem)}</span>
               </strong>
             </article>
           ))}

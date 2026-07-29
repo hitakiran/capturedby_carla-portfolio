@@ -1,9 +1,67 @@
+"use client";
+
+import { useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import SocialIcon from "@/components/SocialIcon";
+
+const SUCCESS_MESSAGE =
+  "Thank you for reaching out! Please check your email, including your spam or junk folder just in case, for a confirmation from me.";
 
 // ContactFooter keeps the contact form and footer together because they sit
 // directly next to each other at the bottom of the homepage.
 export default function ContactFooter({ content }) {
+  const [formMessage, setFormMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function getFormValue(formData, fieldName) {
+    // This helper turns empty fields into clean strings before we send them.
+    return String(formData.get(fieldName) || "").trim();
+  }
+
+  async function handleContactSubmit(event) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const answers = [
+      { label: "Name", value: getFormValue(formData, "contact-name") },
+      { label: "Phone", value: getFormValue(formData, "contact-phone") },
+      { label: "Email", value: getFormValue(formData, "contact-email") },
+      { label: "Message", value: getFormValue(formData, "contact-message") },
+    ];
+
+    setFormMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/form-submissions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          formType: "Contact",
+          clientName: getFormValue(formData, "contact-name"),
+          clientEmail: getFormValue(formData, "contact-email"),
+          answers,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Something went wrong. Please try again.");
+      }
+
+      form.reset();
+      setFormMessage(result.message || SUCCESS_MESSAGE);
+    } catch (error) {
+      setFormMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <>
       <section className="contact-section" id="contact" aria-labelledby="contact-heading">
@@ -47,8 +105,7 @@ export default function ContactFooter({ content }) {
               </div>
             </div>
 
-            {/* This form is visual only for now. Supabase or email logic can be added later. */}
-            <form className="contact-form">
+            <form className="contact-form" onSubmit={handleContactSubmit}>
               {content.formFields.map((field) => (
                 <label key={field.id}>
                   <span>{field.label}</span>
@@ -61,8 +118,10 @@ export default function ContactFooter({ content }) {
                 <textarea id="contact-message" name="contact-message" rows="6" />
               </label>
 
-              <button className="text-button" type="submit">
-                Submit
+              {formMessage && <p className="form-submit-message">{formMessage}</p>}
+
+              <button className="text-button" disabled={isSubmitting} type="submit">
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
             </form>
           </div>

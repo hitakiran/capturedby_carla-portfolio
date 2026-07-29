@@ -74,6 +74,20 @@
   max-width: 960px;
 }
 
+.faq-empty-state {
+  background: var(--warm-beige);
+  border: 1px solid rgba(var(--text-rgb), 0.12);
+  border-radius: 28px;
+  box-shadow: 0 18px 42px rgba(var(--text-rgb), 0.06);
+  color: var(--walnut);
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  margin: 0 auto;
+  max-width: 960px;
+  padding: clamp(22px, 4vw, 34px);
+  text-align: center;
+}
+
 .faq-item {
   background: var(--warm-beige);
   border: 1px solid rgba(var(--text-rgb), 0.12);
