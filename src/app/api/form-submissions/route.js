@@ -4,7 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 const SUCCESS_MESSAGE =
-  "Thank you for reaching out! Please check your email, including your spam or junk folder just in case, for a confirmation from me.";
+  "Thanks for filling it out! I will reach out soon to set up a 15-minute meeting to discuss more.";
+const CONTACT_SUCCESS_MESSAGE =
+  "Thanks for filling it out! I will reach out soon.";
 
 function cleanAnswerValue(value) {
   if (Array.isArray(value)) {
@@ -61,34 +63,70 @@ function buildHtmlEmail({ answers, formType }) {
   `;
 }
 
-function buildClientConfirmationText({ clientName }) {
+function getClientConfirmationSubject({ clientName, formType }) {
+  if (formType === "Contact") {
+    return "Thank you for contacting me!";
+  }
+
+  return clientName
+    ? `Inquiry Confirmation for ${clientName}`
+    : "Inquiry Confirmation";
+}
+
+function buildClientConfirmationText({ clientName, formType }) {
   const greetingName = clientName ? ` ${clientName}` : "";
+
+  if (formType === "Contact") {
+    return [
+      `Hi${greetingName},`,
+      "",
+      "This is a confirmation email. Keep an eye for an email from me to discuss more.",
+      "",
+      "With love,",
+      "Carla ♡",
+    ].join("\n");
+  }
 
   return [
     `Hi${greetingName},`,
     "",
     "Thank you for reaching out! I received your form submission and will review your details soon.",
-    "Please keep an eye on your email, including your spam or junk folder just in case, for my reply.",
+    "Please keep an eye on your email, including your spam or junk folder just in case, for my reply to set up a 15 minute call to discuss photoshoot details.",
     "",
     "With love,",
-    "Carla",
+    "Carla ♡",
   ].join("\n");
 }
 
-function buildClientConfirmationHtml({ clientName }) {
+function buildClientConfirmationHtml({ clientName, formType }) {
   const greetingName = clientName ? ` ${escapeHtml(clientName)}` : "";
+  const subject = getClientConfirmationSubject({ clientName, formType });
+  const message =
+    formType === "Contact"
+      ? "This is a confirmation email. Keep an eye for an email from me to discuss more."
+      : "Please keep an eye on your email, including your spam or junk folder just in case, for my reply to set up a 15 minute call to discuss photoshoot details.";
+  const inquiryIntro =
+    formType === "Contact"
+      ? ""
+      : `
+        <p style="font-size: 16px; line-height: 1.7;">
+          Thank you for reaching out! I received your form submission and will review your details soon.
+        </p>
+      `;
 
   return `
     <div style="font-family: Georgia, serif; color: #463c32; background: #f6f1e8; padding: 24px;">
       <div style="background: #fffaf3; border: 1px solid #ede3d6; border-radius: 18px; padding: 24px;">
-        <h1 style="margin: 0 0 16px; font-size: 28px;">Hi${greetingName},</h1>
+        <h1 style="margin: 0 0 16px; font-size: 28px;">${escapeHtml(subject)}</h1>
+        <p style="font-size: 16px; line-height: 1.7;">Hi${greetingName},</p>
+        ${inquiryIntro}
+        <p style="font-size: 16px; line-height: 1.7;">${escapeHtml(message)}</p>
         <p style="font-size: 16px; line-height: 1.7;">
-          Thank you for reaching out! I received your form submission and will review your details soon.
+          With love,<br />
+          <span style="font-family: 'Brush Script MT', 'Segoe Script', cursive; font-size: 28px;">
+            Carla ♡
+          </span>
         </p>
-        <p style="font-size: 16px; line-height: 1.7;">
-          Please keep an eye on your email, including your spam or junk folder just in case, for my reply.
-        </p>
-        <p style="font-size: 16px; line-height: 1.7;">With love,<br />Carla</p>
       </div>
     </div>
   `;
@@ -154,10 +192,11 @@ async function sendClientConfirmationEmail(payload) {
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY);
+  const subject = getClientConfirmationSubject(payload);
   const { error } = await resend.emails.send({
     from: "onboarding@resend.dev",
     to: payload.clientEmail,
-    subject: "I received your inquiry",
+    subject,
     text: buildClientConfirmationText(payload),
     html: buildClientConfirmationHtml(payload),
   });
@@ -194,7 +233,7 @@ export async function POST(request) {
 
     return Response.json({
       ok: true,
-      message: SUCCESS_MESSAGE,
+      message: formType === "Contact" ? CONTACT_SUCCESS_MESSAGE : SUCCESS_MESSAGE,
     });
   } catch (error) {
     console.error("Form submission failed:", error);

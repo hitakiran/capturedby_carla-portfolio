@@ -955,6 +955,16 @@ a {
   align-self: center;
 }
 
+.contact-success-card p {
+  font-size: clamp(1.16rem, 2.2vw, 1.35rem);
+}
+
+.contact-success-card .contact-success-signature {
+  font-size: clamp(1.05rem, 2vw, 1.24rem);
+  margin-top: 4px;
+  text-align: center;
+}
+
 .section-eyebrow {
   color: var(--dusty-olive);
   font-size: 0.78rem;

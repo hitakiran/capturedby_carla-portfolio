@@ -5,7 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SocialIcon from "@/components/SocialIcon";
 
 const SUCCESS_MESSAGE =
-  "Thank you for reaching out! Please check your email, including your spam or junk folder just in case, for a confirmation from me.";
+  "Thanks for filling it out! I will reach out soon.";
 
 // ContactFooter keeps the contact form and footer together because they sit
 // directly next to each other at the bottom of the homepage.
@@ -55,7 +55,8 @@ export default function ContactFooter({ content }) {
       }
 
       form.reset();
-      setFormMessage(result.message || SUCCESS_MESSAGE);
+      // Clear formMessage because the success card has its own fixed copy below.
+      setFormMessage("");
       setIsSubmitted(true);
     } catch (error) {
       setFormMessage(error.message);
@@ -110,8 +111,9 @@ export default function ContactFooter({ content }) {
             {isSubmitted ? (
               <div className="form-success-card contact-success-card" role="status" aria-live="polite">
                 <span className="form-success-icon" aria-hidden="true" />
-                <h3>Message received</h3>
-                <p>{formMessage || SUCCESS_MESSAGE}</p>
+                <h3>Message received!</h3>
+                <p>{SUCCESS_MESSAGE}</p>
+                <p className="contact-success-signature">With love, Carla ♡</p>
               </div>
             ) : (
               <form className="contact-form" onSubmit={handleContactSubmit}>
