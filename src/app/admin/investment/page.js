@@ -3,7 +3,7 @@ import AdminInvestmentManager from "@/components/admin/AdminInvestmentManager";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Investment Editor | Carla Santos Photography",
+  title: "Investment | Carla Santos Photography",
 };
 
 export default async function AdminInvestmentPage() {

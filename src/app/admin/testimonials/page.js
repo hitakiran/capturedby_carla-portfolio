@@ -3,7 +3,7 @@ import AdminTestimonialsManager from "@/components/admin/AdminTestimonialsManage
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Testimonials Manager | Carla Santos Photography",
+  title: "Testimonials | Carla Santos Photography",
 };
 
 export default async function AdminTestimonialsPage() {

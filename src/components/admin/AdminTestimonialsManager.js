@@ -49,7 +49,7 @@ function StarSelector({ disabled = false, label, onChange, rating }) {
             aria-checked={rating === starValue}
             aria-label={`${starValue} star${starValue === 1 ? "" : "s"}`}
             className={`text-2xl transition ${
-              isFilled ? "text-amber-500" : "text-stone-300"
+              isFilled ? "text-[var(--button)]" : "text-stone-300"
             } hover:scale-110 disabled:cursor-not-allowed disabled:opacity-60`}
             disabled={disabled}
             key={starValue}
@@ -69,7 +69,10 @@ function RatingDisplay({ rating }) {
   const safeRating = getSafeRating(rating);
 
   return (
-    <p className="text-lg tracking-[0.08em] text-amber-500" aria-label={`${safeRating} out of 5 stars`}>
+    <p
+      className="text-lg tracking-[0.08em] text-[var(--button)]"
+      aria-label={`${safeRating} out of 5 stars`}
+    >
       {"★".repeat(safeRating)}
       <span className="text-stone-300">{"★".repeat(5 - safeRating)}</span>
     </p>
@@ -292,11 +295,8 @@ export default function AdminTestimonialsManager() {
   return (
     <div className="grid gap-8">
       <header>
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-stone-500">
+        <h1 className="text-3xl font-semibold text-stone-900">
           Testimonials
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold text-stone-900">
-          Testimonials manager
         </h1>
         <p className="mt-4 max-w-2xl leading-7 text-stone-600">
           Add, edit, and delete client reviews from the testimonials table. Keep
@@ -327,7 +327,7 @@ export default function AdminTestimonialsManager() {
         </div>
 
         {hasReachedLimit ? (
-          <p className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+          <p className="mt-6 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-700">
             Maximum of 10 testimonials reached — delete one to add a new one.
           </p>
         ) : (
@@ -392,10 +392,7 @@ export default function AdminTestimonialsManager() {
 
       <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
         <div className="border-b border-stone-200 pb-5">
-          <h2 className="text-2xl font-semibold text-stone-900">Current testimonials</h2>
-          <p className="mt-2 text-sm text-stone-600">
-            Ordered by display_order, then created date when no order is set.
-          </p>
+          <h2 className="text-2xl font-semibold text-stone-900">Current</h2>
         </div>
 
         {sortedTestimonials.length === 0 ? (

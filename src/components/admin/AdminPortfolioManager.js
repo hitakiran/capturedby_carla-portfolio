@@ -7,15 +7,13 @@ import { createClient } from "@/lib/supabase/client";
 
 const STORAGE_BUCKET = "portfolio";
 
+const PORTFOLIO_CATEGORIES = ["Couples", "Wedding", "Portraits", "Families", "Brands"];
+
 function cleanFileName(fileName) {
   return fileName
     .toLowerCase()
     .replace(/[^a-z0-9.]+/g, "-")
     .replaceAll("--", "-");
-}
-
-function cleanCategoryName(categoryName) {
-  return categoryName.trim();
 }
 
 function getStoragePathFromPublicUrl(imageUrl) {
@@ -43,13 +41,11 @@ function getStoragePathFromPublicUrl(imageUrl) {
 // fetching rows, filtering, uploading files, and deleting storage objects.
 export default function AdminPortfolioManager() {
   const fileInputRef = useRef(null);
-  const [caption, setCaption] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [newCategory, setNewCategory] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -104,16 +100,16 @@ export default function AdminPortfolioManager() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    const uploadedFile = fileInputRef.current?.files?.[0];
-    const finalCategory = cleanCategoryName(newCategory || selectedCategory);
+    const uploadedFiles = Array.from(fileInputRef.current?.files || []);
+    const finalCategory = selectedCategory;
 
     if (!finalCategory) {
-      setErrorMessage("Please choose an existing category or type a new one.");
+      setErrorMessage("Please choose a category.");
       return;
     }
 
-    if (!uploadedFile) {
-      setErrorMessage("Please choose an image file to upload.");
+    if (uploadedFiles.length === 0) {
+      setErrorMessage("Please choose at least one image file to upload.");
       return;
     }
 
@@ -121,55 +117,65 @@ export default function AdminPortfolioManager() {
 
     const supabase = createClient();
     const safeCategoryFolder = finalCategory.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const filePath = `${safeCategoryFolder}/${Date.now()}-${cleanFileName(uploadedFile.name)}`;
+    const insertedRows = [];
 
-    // 1. Upload the actual file into the public "portfolio" Storage bucket.
-    const { error: uploadError } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(filePath, uploadedFile, {
-        cacheControl: "3600",
-        upsert: false,
-      });
+    // Upload each selected image one at a time. This keeps the code beginner-friendly
+    // while still letting Carla choose multiple files in the file picker.
+    for (const [fileIndex, uploadedFile] of uploadedFiles.entries()) {
+      const filePath = `${safeCategoryFolder}/${Date.now()}-${fileIndex}-${cleanFileName(
+        uploadedFile.name,
+      )}`;
 
-    if (uploadError) {
-      setErrorMessage("Upload failed. Please try again.");
-      setIsUploading(false);
-      return;
+      // 1. Upload the actual file into the public "portfolio" Storage bucket.
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(filePath, uploadedFile, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        setErrorMessage("One of the uploads failed. Please try again.");
+        setIsUploading(false);
+        return;
+      }
+
+      // 2. Get the public URL so the photo can be displayed on the site.
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+
+      // 3. Insert the matching database row. Captions are intentionally blank now.
+      const { data: insertedRow, error: insertError } = await supabase
+        .from("portfolio_images")
+        .insert({
+          category: finalCategory,
+          image_url: publicUrl,
+          caption: "",
+        })
+        .select("id, category, image_url, caption, created_at")
+        .single();
+
+      if (insertError) {
+        setErrorMessage("A file uploaded, but the database row could not be saved.");
+        setIsUploading(false);
+        return;
+      }
+
+      insertedRows.push(insertedRow);
     }
 
-    // 2. Get the public URL so the photo can be displayed on the site.
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
-
-    // 3. Insert the matching database row.
-    const { data: insertedRow, error: insertError } = await supabase
-      .from("portfolio_images")
-      .insert({
-        category: finalCategory,
-        image_url: publicUrl,
-        caption: caption.trim(),
-      })
-      .select("id, category, image_url, caption, created_at")
-      .single();
-
-    if (insertError) {
-      setErrorMessage("The file uploaded, but the database row could not be saved.");
-      setIsUploading(false);
-      return;
-    }
-
-    // Add the new row to the top of the grid immediately.
-    setImages((currentImages) => [insertedRow, ...currentImages]);
+    // Add the new rows to the top of the grid immediately.
+    setImages((currentImages) => [...insertedRows.reverse(), ...currentImages]);
     setSelectedCategory(finalCategory);
-    setNewCategory("");
-    setCaption("");
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
 
-    setSuccessMessage("Photo uploaded!");
+    setSuccessMessage(
+      uploadedFiles.length === 1 ? "Photo uploaded!" : `${uploadedFiles.length} photos uploaded!`,
+    );
     setIsUploading(false);
   }
 
@@ -220,71 +226,42 @@ export default function AdminPortfolioManager() {
   return (
     <div className="grid gap-8">
       <header>
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-stone-500">
-          Portfolio
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold text-stone-900">Photo manager</h1>
+        <h1 className="text-3xl font-semibold text-stone-900">Portfolio Photos</h1>
         <p className="mt-4 max-w-2xl leading-7 text-stone-600">
-          Upload, filter, and delete portfolio photos from Supabase Storage and the
-          portfolio_images table.
+          Upload or delete portfolio photos.
         </p>
       </header>
 
       <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
-        <h2 className="text-2xl font-semibold text-stone-900">Upload a photo</h2>
+        <h2 className="text-2xl font-semibold text-stone-900">Upload</h2>
 
         <form className="mt-6 grid gap-5" onSubmit={handleUpload}>
-          <div className="grid gap-5 md:grid-cols-2">
-            <label className="grid gap-2 text-sm font-semibold text-stone-700">
-              Existing category
-              <select
-                className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
-                disabled={isUploading}
-                onChange={(event) => setSelectedCategory(event.target.value)}
-                value={selectedCategory}
-              >
-                <option value="">Choose a category</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="grid gap-2 text-sm font-semibold text-stone-700">
-              New category
-              <input
-                className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
-                disabled={isUploading}
-                onChange={(event) => setNewCategory(event.target.value)}
-                placeholder="Example: Wedding"
-                type="text"
-                value={newCategory}
-              />
-            </label>
-          </div>
+          <label className="grid gap-2 text-sm font-semibold text-stone-700">
+            Choose a category
+            <select
+              className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+              disabled={isUploading}
+              onChange={(event) => setSelectedCategory(event.target.value)}
+              value={selectedCategory}
+            >
+              <option value="">Choose a category</option>
+              {PORTFOLIO_CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </label>
 
           <label className="grid gap-2 text-sm font-semibold text-stone-700">
-            Image file
+            Image files
             <input
               accept="image/*"
               className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 file:mr-4 file:rounded-full file:border-0 file:bg-stone-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
               disabled={isUploading}
+              multiple
               ref={fileInputRef}
               type="file"
-            />
-          </label>
-
-          <label className="grid gap-2 text-sm font-semibold text-stone-700">
-            Caption
-            <input
-              className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
-              disabled={isUploading}
-              onChange={(event) => setCaption(event.target.value)}
-              placeholder="Optional caption"
-              type="text"
-              value={caption}
             />
           </label>
 
@@ -313,7 +290,7 @@ export default function AdminPortfolioManager() {
       <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-stone-900">Portfolio photos</h2>
+            <h2 className="text-2xl font-semibold text-stone-900">Portfolio Photos</h2>
             <p className="mt-2 text-sm text-stone-600">
               {images.length} total photo{images.length === 1 ? "" : "s"}
             </p>
@@ -363,9 +340,6 @@ export default function AdminPortfolioManager() {
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">
                       {image.category}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-stone-700">
-                      {image.caption || "No caption added"}
                     </p>
                   </div>
 

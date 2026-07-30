@@ -42,6 +42,32 @@ function formatImageKey(imageKey) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function sortSiteImages(rows) {
+  const imageOrder = {
+    hero_banner: 1,
+    about_portrait: 2,
+  };
+
+  return [...rows].sort((firstRow, secondRow) => {
+    const firstOrder = imageOrder[firstRow.image_key] || 99;
+    const secondOrder = imageOrder[secondRow.image_key] || 99;
+
+    if (firstOrder !== secondOrder) {
+      return firstOrder - secondOrder;
+    }
+
+    return (firstRow.label || "").localeCompare(secondRow.label || "");
+  });
+}
+
+function getSiteImageLabel(row) {
+  if (row.image_key === "about_portrait") {
+    return '"About Me" Section Portrait';
+  }
+
+  return row.label || formatImageKey(row.image_key || "Site image");
+}
+
 // AdminSiteImagesManager controls the single-purpose images used around the site,
 // like the homepage hero banner and About section portrait.
 export default function AdminSiteImagesManager() {
@@ -71,7 +97,7 @@ export default function AdminSiteImagesManager() {
         return;
       }
 
-      setSiteImages(data || []);
+      setSiteImages(sortSiteImages(data || []));
       setIsLoading(false);
     }
 
@@ -174,13 +200,15 @@ export default function AdminSiteImagesManager() {
 
     // Update the preview immediately without forcing a full page refresh.
     setSiteImages((currentRows) =>
-      currentRows.map((currentRow) => {
-        if (currentRow.id !== row.id) {
-          return currentRow;
-        }
+      sortSiteImages(
+        currentRows.map((currentRow) => {
+          if (currentRow.id !== row.id) {
+            return currentRow;
+          }
 
-        return updatedRow;
-      }),
+          return updatedRow;
+        }),
+      ),
     );
 
     setSelectedFilesById((currentFiles) => ({
@@ -213,15 +241,11 @@ export default function AdminSiteImagesManager() {
   return (
     <div className="grid gap-8">
       <header>
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-stone-500">
-          Site Images
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold text-stone-900">
-          Manage single-purpose photos
+        <h1 className="text-3xl font-semibold text-stone-900">
+          Single- Purpose Photos
         </h1>
         <p className="mt-4 max-w-2xl leading-7 text-stone-600">
-          Replace fixed images like the homepage hero banner and About portrait. These
-          files upload to the portfolio bucket inside the site-images folder.
+          Replace Hero Banner &amp; &quot;About Me&quot; section portrait.
         </p>
       </header>
 
@@ -244,16 +268,9 @@ export default function AdminSiteImagesManager() {
                 key={row.id}
               >
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">
-                    {row.page || "Site"} / {row.image_key || "image"}
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold text-stone-900">
-                    {row.label || formatImageKey(row.image_key || "Site image")}
+                  <h2 className="text-2xl font-semibold text-stone-900">
+                    {getSiteImageLabel(row)}
                   </h2>
-                  <p className="mt-3 leading-7 text-stone-600">
-                    Choose a replacement image, then upload it to update this exact
-                    row in the site_images table.
-                  </p>
 
                   <div className="mt-6 grid gap-4">
                     <label className="grid gap-2 text-sm font-semibold text-stone-700">
@@ -295,7 +312,7 @@ export default function AdminSiteImagesManager() {
                 <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
                   {row.image_url ? (
                     <img
-                      alt={row.label || formatImageKey(row.image_key || "Site image")}
+                      alt={getSiteImageLabel(row)}
                       className="h-72 w-full rounded-xl object-cover"
                       src={row.image_url}
                     />

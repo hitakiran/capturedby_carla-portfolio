@@ -1,25 +1,44 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-function formatPageName(pageName) {
-  return pageName
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
+const aboutRowOrder = [
+  "about_intro",
+  "about_paragraph_1",
+  "about_paragraph_2",
+  "about_paragraph_3",
+  "about_paragraph_4",
+  "about_closing",
+];
 
-function groupRowsByPage(rows) {
-  return rows.reduce((groups, row) => {
-    const pageName = row.page || "uncategorized";
+const contentSections = [
+  {
+    id: "about",
+    title: "About Me",
+    description: "Edit the About section intro, paragraphs, and closing line.",
+    matchesRow: (row) => row.section_key?.startsWith("about_"),
+  },
+  {
+    id: "stats",
+    title: "Stats",
+    description: "Edit the homepage stat numbers.",
+    matchesRow: (row) => row.section_key?.startsWith("stats_"),
+  },
+];
 
-    if (!groups[pageName]) {
-      groups[pageName] = [];
-    }
+function sortRowsForSection(sectionId, rows) {
+  // About text should read in the same order it appears on the public page.
+  if (sectionId === "about") {
+    return [...rows].sort((firstRow, secondRow) => {
+      return (
+        aboutRowOrder.indexOf(firstRow.section_key) -
+        aboutRowOrder.indexOf(secondRow.section_key)
+      );
+    });
+  }
 
-    groups[pageName].push(row);
-    return groups;
-  }, {});
+  return rows;
 }
 
 // AdminContentEditor is a Client Component because it needs browser state:
@@ -29,9 +48,7 @@ export default function AdminContentEditor() {
   const [editedValues, setEditedValues] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [saveStatusByPage, setSaveStatusByPage] = useState({});
-
-  const rowsGroupedByPage = useMemo(() => groupRowsByPage(contentRows), [contentRows]);
+  const [saveStatusBySection, setSaveStatusBySection] = useState({});
 
   useEffect(() => {
     async function fetchContentRows() {
@@ -76,17 +93,17 @@ export default function AdminContentEditor() {
     }));
   }
 
-  async function savePageSection(pageName, rowsForPage) {
-    setSaveStatusByPage((currentStatus) => ({
+  async function saveContentSection(sectionId, rowsForSection) {
+    setSaveStatusBySection((currentStatus) => ({
       ...currentStatus,
-      [pageName]: { type: "saving", message: "Saving..." },
+      [sectionId]: { type: "saving", message: "Saving..." },
     }));
 
     const supabase = createClient();
 
     try {
-      // Update every row in this page section by matching its id.
-      const updateRequests = rowsForPage.map((row) =>
+      // Update every row in this section by matching its id.
+      const updateRequests = rowsForSection.map((row) =>
         supabase
           .from("site_content")
           .update({
@@ -104,9 +121,11 @@ export default function AdminContentEditor() {
       }
 
       // Keep local row data in sync with the saved textarea values.
+      const savedRowIds = new Set(rowsForSection.map((row) => row.id));
+
       setContentRows((currentRows) =>
         currentRows.map((row) => {
-          if (row.page !== pageName) {
+          if (!savedRowIds.has(row.id)) {
             return row;
           }
 
@@ -118,27 +137,34 @@ export default function AdminContentEditor() {
         }),
       );
 
-      setSaveStatusByPage((currentStatus) => ({
+      setSaveStatusBySection((currentStatus) => ({
         ...currentStatus,
-        [pageName]: { type: "success", message: "Saved!" },
+        [sectionId]: { type: "success", message: "Saved!" },
       }));
 
       setTimeout(() => {
-        setSaveStatusByPage((currentStatus) => ({
+        setSaveStatusBySection((currentStatus) => ({
           ...currentStatus,
-          [pageName]: null,
+          [sectionId]: null,
         }));
       }, 2500);
     } catch {
-      setSaveStatusByPage((currentStatus) => ({
+      setSaveStatusBySection((currentStatus) => ({
         ...currentStatus,
-        [pageName]: {
+        [sectionId]: {
           type: "error",
           message: "Something went wrong while saving. Please try again.",
         },
       }));
     }
   }
+
+  const visibleContentSections = contentSections
+    .map((section) => ({
+      ...section,
+      rows: sortRowsForSection(section.id, contentRows.filter(section.matchesRow)),
+    }))
+    .filter((section) => section.rows.length > 0);
 
   if (isLoading) {
     return (
@@ -159,7 +185,7 @@ export default function AdminContentEditor() {
   if (contentRows.length === 0) {
     return (
       <section className="rounded-3xl border border-stone-200 bg-white p-8 shadow-sm">
-        <h1 className="text-3xl font-semibold text-stone-900">Content editor</h1>
+        <h1 className="text-3xl font-semibold text-stone-900">Content</h1>
         <p className="mt-4 leading-7 text-stone-600">
           No content sections yet — add some rows in Supabase to get started.
         </p>
@@ -170,71 +196,74 @@ export default function AdminContentEditor() {
   return (
     <div className="grid gap-8">
       <header>
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-stone-500">
-          Dashboard
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold text-stone-900">Content editor</h1>
+        <h1 className="text-3xl font-semibold text-stone-900">Content</h1>
         <p className="mt-4 max-w-2xl leading-7 text-stone-600">
-          Edit text from the site_content table. Each section saves its own page rows.
+          Edit about me text & stat numbers.
         </p>
       </header>
 
-      {Object.entries(rowsGroupedByPage).map(([pageName, rowsForPage]) => {
-        const saveStatus = saveStatusByPage[pageName];
-        const isSaving = saveStatus?.type === "saving";
+      <div className="grid gap-6 xl:grid-cols-2 xl:items-start">
+        {visibleContentSections.map((section) => {
+          const saveStatus = saveStatusBySection[section.id];
+          const isSaving = saveStatus?.type === "saving";
 
-        return (
-          <section
-            className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8"
-            key={pageName}
-          >
-            <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-stone-500">
-                  Page
-                </p>
-                <h2 className="mt-1 text-2xl font-semibold text-stone-900">
-                  {formatPageName(pageName)}
-                </h2>
+          return (
+            <section
+              className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8"
+              key={section.id}
+            >
+              <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-2xl font-semibold text-stone-900">{section.title}</h2>
+                  <p className="mt-2 leading-7 text-stone-600">{section.description}</p>
+                </div>
+
+                <button
+                  className="rounded-full bg-stone-900 px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={isSaving}
+                  onClick={() => saveContentSection(section.id, section.rows)}
+                  type="button"
+                >
+                  {isSaving ? "Saving..." : "Save"}
+                </button>
               </div>
 
-              <button
-                className="rounded-full bg-stone-900 px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={isSaving}
-                onClick={() => savePageSection(pageName, rowsForPage)}
-                type="button"
-              >
-                {isSaving ? "Saving..." : "Save"}
-              </button>
-            </div>
+              <div className="mt-6 grid gap-6">
+                {section.rows.map((row) => (
+                  <label className="grid gap-2" key={row.id}>
+                    <span className="text-sm font-semibold text-stone-700">{row.label}</span>
+                    {section.id === "stats" ? (
+                      <input
+                        className="rounded-2xl border border-stone-300 bg-white px-4 py-3 text-base leading-7 text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                        onChange={(event) => updateTextareaValue(row.id, event.target.value)}
+                        value={editedValues[row.id] || ""}
+                      />
+                    ) : (
+                      <textarea
+                        className="min-h-32 rounded-2xl border border-stone-300 bg-white px-4 py-3 text-base leading-7 text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                        onChange={(event) => updateTextareaValue(row.id, event.target.value)}
+                        value={editedValues[row.id] || ""}
+                      />
+                    )}
+                  </label>
+                ))}
+              </div>
 
-            <div className="mt-6 grid gap-6">
-              {rowsForPage.map((row) => (
-                <label className="grid gap-2" key={row.id}>
-                  <span className="text-sm font-semibold text-stone-700">{row.label}</span>
-                  <textarea
-                    className="min-h-32 rounded-2xl border border-stone-300 bg-white px-4 py-3 text-base leading-7 text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
-                    onChange={(event) => updateTextareaValue(row.id, event.target.value)}
-                    value={editedValues[row.id] || ""}
-                  />
-                </label>
-              ))}
-            </div>
-
-            {saveStatus && (
-              <p
-                className={`mt-5 rounded-2xl px-4 py-3 text-sm font-medium ${
-                  saveStatus.type === "error"
-                    ? "border border-red-200 bg-red-50 text-red-700"
-                    : "border border-emerald-200 bg-emerald-50 text-emerald-700"
-                }`}
-              >
-                {saveStatus.message}
-              </p>
-            )}
-          </section>
-        );
-      })}
+              {saveStatus && (
+                <p
+                  className={`mt-5 rounded-2xl px-4 py-3 text-sm font-medium ${
+                    saveStatus.type === "error"
+                      ? "border border-red-200 bg-red-50 text-red-700"
+                      : "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  }`}
+                >
+                  {saveStatus.message}
+                </p>
+              )}
+            </section>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -166,6 +166,7 @@ function groupPackagesByCategory(packages) {
 // AdminInvestmentManager is a Client Component because it lets the admin edit,
 // add, and delete package rows directly from Supabase.
 export default function AdminInvestmentManager() {
+  const [activeCategory, setActiveCategory] = useState(DEFAULT_PACKAGE_CATEGORY);
   const [addPackageForm, setAddPackageForm] = useState(EMPTY_PACKAGE_FORM);
   const [errorMessage, setErrorMessage] = useState("");
   const [isAddingPackage, setIsAddingPackage] = useState(false);
@@ -376,6 +377,7 @@ export default function AdminInvestmentManager() {
     }
 
     setPackages((currentPackages) => sortByDisplayOrder([...currentPackages, insertedPackage]));
+    setActiveCategory(insertedPackage.category);
     setPackageForms((currentForms) => ({
       ...currentForms,
       [insertedPackage.id]: getEditablePackageForm(insertedPackage),
@@ -583,14 +585,11 @@ export default function AdminInvestmentManager() {
     <div className="grid gap-8">
       <header className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-stone-500">
+          <h1 className="text-3xl font-semibold text-stone-900">
             Investment
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold text-stone-900">
-            Investment packages
           </h1>
           <p className="mt-4 max-w-2xl leading-7 text-stone-600">
-            Add, edit, reorder, and delete package rows from the investment_packages table.
+            Add, edit, reorder, and delete investments.
           </p>
         </div>
 
@@ -628,10 +627,10 @@ export default function AdminInvestmentManager() {
 
           <form className="mt-6 grid gap-5" onSubmit={handleAddPackage}>
             <div className="grid gap-5 md:grid-cols-2">
-              <label className="grid gap-2 text-sm font-semibold text-stone-700">
+              <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                 Category
                 <select
-                  className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                  className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
                   disabled={isAddingPackage}
                   onChange={(event) => updateAddPackageCategory(event.target.value)}
                   value={addPackageForm.category}
@@ -644,10 +643,10 @@ export default function AdminInvestmentManager() {
                 </select>
               </label>
 
-              <label className="grid gap-2 text-sm font-semibold text-stone-700">
+              <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                 Section title
                 <input
-                  className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                  className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
                   disabled={isAddingPackage}
                   onChange={(event) =>
                     setAddPackageForm((currentForm) => ({
@@ -679,8 +678,8 @@ export default function AdminInvestmentManager() {
               </label>
 
               {/* Price and display order share their own row so they stay evenly spaced. */}
-              <div className="grid gap-5 md:grid-cols-2">
-                <label className="grid gap-2 text-sm font-semibold text-stone-700">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                   Price
                   <input
                     className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
@@ -697,7 +696,7 @@ export default function AdminInvestmentManager() {
                   />
                 </label>
 
-                <label className="grid gap-2 text-sm font-semibold text-stone-700">
+                <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                   Display order
                   <input
                     className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
@@ -759,36 +758,63 @@ export default function AdminInvestmentManager() {
         </section>
       )}
 
-      {groupedPackages.length === 0 ? (
-        <section className="rounded-3xl border border-stone-200 bg-white p-8 shadow-sm">
-          <p className="leading-7 text-stone-600">
-            No packages yet — add your first one above.
+      <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+        <div className="border-b border-stone-200 pb-5">
+          <h2 className="text-2xl font-semibold text-stone-900">Saved</h2>
+          <p className="mt-2 text-sm text-stone-600">
+            Choose a category to view and edit its packages.
           </p>
-        </section>
-      ) : (
-        groupedPackages.map((group) => {
-          const sectionStatus = saveStatusById[`section-${group.category}`];
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          {FIXED_INVESTMENT_CATEGORIES.map((category) => {
+            const packageCount =
+              groupedPackages.find((group) => group.category === category.value)?.packages.length || 0;
+            const isActive = activeCategory === category.value;
+
+            return (
+              <button
+                className={`rounded-full px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
+                  isActive
+                    ? "bg-stone-900 text-white"
+                    : "border border-stone-300 text-stone-700 hover:bg-stone-50"
+                }`}
+                key={category.value}
+                onClick={() => setActiveCategory(category.value)}
+                type="button"
+              >
+                {category.label} ({packageCount})
+              </button>
+            );
+          })}
+        </div>
+
+        {(() => {
+          const activeGroup =
+            groupedPackages.find((group) => group.category === activeCategory) || {
+              category: activeCategory,
+              packages: [],
+              section_title: sectionTitleForms[activeCategory] || "",
+            };
+          const sectionStatus = saveStatusById[`section-${activeGroup.category}`];
           const isSectionSaving = sectionStatus === "saving";
 
           return (
-            <section
-              className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8"
-              key={group.category}
-            >
+            <div className="mt-6 rounded-2xl border border-stone-200 bg-stone-50 p-5">
               <div className="grid gap-4 border-b border-stone-200 pb-5 md:grid-cols-[1fr_auto] md:items-end">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-stone-500">
                     Category
                   </p>
                   <h2 className="mt-1 text-2xl font-semibold text-stone-900">
-                    {formatCategoryName(group.category)}
+                    {formatCategoryName(activeGroup.category)}
                   </h2>
                 </div>
 
                 <button
                   className="w-fit rounded-full bg-stone-900 px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={isSectionSaving}
-                  onClick={() => handleSaveSectionTitle(group.category)}
+                  disabled={isSectionSaving || activeGroup.packages.length === 0}
+                  onClick={() => handleSaveSectionTitle(activeGroup.category)}
                   type="button"
                 >
                   {isSectionSaving ? "Saving..." : "Save Section Title"}
@@ -798,26 +824,26 @@ export default function AdminInvestmentManager() {
               <label className="mt-6 grid gap-2 text-sm font-semibold text-stone-700">
                 Section title
                 <input
-                  className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                  className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
                   disabled={isSectionSaving}
                   onChange={(event) =>
                     setSectionTitleForms((currentForms) => ({
                       ...currentForms,
-                      [group.category]: event.target.value,
+                      [activeGroup.category]: event.target.value,
                     }))
                   }
                   type="text"
-                  value={sectionTitleForms[group.category] ?? group.section_title}
+                  value={sectionTitleForms[activeGroup.category] ?? activeGroup.section_title}
                 />
               </label>
 
-              {group.packages.length === 0 ? (
+              {activeGroup.packages.length === 0 ? (
                 <p className="mt-6 leading-7 text-stone-600">
                   No packages in this category yet — use Add Package above.
                 </p>
               ) : (
                 <div className="mt-6 grid gap-5">
-                  {group.packages.map((packageItem) => {
+                  {activeGroup.packages.map((packageItem) => {
                     const form = packageForms[packageItem.id] || getEditablePackageForm(packageItem);
                     const rowStatus = saveStatusById[packageItem.id];
                     const isSaving = rowStatus === "saving";
@@ -828,11 +854,11 @@ export default function AdminInvestmentManager() {
                         className="rounded-2xl border border-stone-200 bg-stone-50 p-5"
                         key={packageItem.id}
                       >
-                        <div className="grid gap-5 md:grid-cols-[1fr_160px_160px]">
-                          <label className="grid gap-2 text-sm font-semibold text-stone-700">
+                        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,150px)_minmax(0,150px)]">
+                          <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                             Package title
                             <input
-                              className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                              className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
                               disabled={isSaving || isDeleting}
                               onChange={(event) =>
                                 updatePackageForm(
@@ -846,10 +872,10 @@ export default function AdminInvestmentManager() {
                             />
                           </label>
 
-                          <label className="grid gap-2 text-sm font-semibold text-stone-700">
+                          <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                             Price
                             <input
-                              className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                              className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
                               disabled={isSaving || isDeleting}
                               min="0"
                               onChange={(event) =>
@@ -860,10 +886,10 @@ export default function AdminInvestmentManager() {
                             />
                           </label>
 
-                          <label className="grid gap-2 text-sm font-semibold text-stone-700">
+                          <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                             Display order
                             <input
-                              className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                              className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
                               disabled={isSaving || isDeleting}
                               onChange={(event) =>
                                 updatePackageForm(
@@ -925,10 +951,10 @@ export default function AdminInvestmentManager() {
                   })}
                 </div>
               )}
-            </section>
+            </div>
           );
-        })
-      )}
+        })()}
+      </section>
     </div>
   );
 }

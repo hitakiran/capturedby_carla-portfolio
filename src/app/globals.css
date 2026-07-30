@@ -60,6 +60,92 @@ a {
 }
 
 /*
+  Admin theme.
+  The admin pages use Tailwind utility classes like bg-white and text-stone-900.
+  These scoped overrides let the admin keep its simple layout while matching the
+  public website's cream, beige, walnut, olive, and clay color palette.
+*/
+.admin-shell {
+  background:
+    linear-gradient(rgba(var(--background-rgb), 0.9), rgba(var(--background-rgb), 0.9)),
+    var(--sand);
+  color: var(--walnut);
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+}
+
+.admin-shell > header {
+  background: rgba(var(--background-rgb), 0.92) !important;
+  border-color: rgba(var(--text-rgb), 0.16) !important;
+}
+
+.admin-shell .bg-white {
+  background-color: rgba(var(--background-rgb), 0.82) !important;
+}
+
+.admin-shell .bg-stone-50 {
+  background-color: var(--section-alternate) !important;
+}
+
+.admin-shell .bg-stone-900 {
+  background-color: var(--button) !important;
+}
+
+.admin-shell .text-stone-900,
+.admin-shell .text-stone-800,
+.admin-shell .text-stone-700 {
+  color: var(--walnut) !important;
+}
+
+.admin-shell .text-stone-600,
+.admin-shell .text-stone-500 {
+  color: rgba(var(--text-rgb), 0.72) !important;
+}
+
+.admin-shell .border-stone-200,
+.admin-shell .border-stone-300 {
+  border-color: rgba(var(--text-rgb), 0.18) !important;
+}
+
+.admin-shell input,
+.admin-shell textarea,
+.admin-shell select {
+  background-color: rgba(var(--background-rgb), 0.82);
+  border-color: rgba(var(--text-rgb), 0.22);
+  color: var(--walnut);
+}
+
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder {
+  color: rgba(var(--text-rgb), 0.48);
+}
+
+.admin-shell input::file-selector-button {
+  background-color: var(--button);
+  color: var(--background);
+}
+
+.admin-shell input::file-selector-button:hover {
+  background-color: var(--accent);
+}
+
+.admin-shell button:hover,
+.admin-shell a:hover {
+  color: var(--walnut);
+}
+
+.admin-shell .hover\:bg-stone-50:hover {
+  background-color: rgba(var(--section-alternate-rgb), 0.72) !important;
+}
+
+.admin-shell .hover\:bg-stone-700:hover {
+  background-color: var(--accent) !important;
+}
+
+.admin-shell .hover\:text-stone-900:hover {
+  color: var(--walnut) !important;
+}
+
+/*
   Reusable scroll reveal animation.
   The small JavaScript helper adds .is-visible once; CSS does the motion.
 */

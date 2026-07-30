@@ -283,14 +283,11 @@ export default function AdminFaqManager() {
     <div className="grid gap-8">
       <header className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-stone-500">
-            FAQ
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold text-stone-900">
-            FAQ editor
+          <h1 className="text-3xl font-semibold text-stone-900">
+            FAQs
           </h1>
           <p className="mt-4 max-w-2xl leading-7 text-stone-600">
-            Add, edit, hide, reorder, and delete questions from the faq_items table.
+            Add, edit, hide, reorder, and delete FAQ questions.
           </p>
         </div>
 
@@ -326,11 +323,11 @@ export default function AdminFaqManager() {
           </div>
 
           <form className="mt-6 grid gap-5" onSubmit={handleAddFaq}>
-            <div className="grid gap-5 md:grid-cols-[1fr_180px]">
-              <label className="grid gap-2 text-sm font-semibold text-stone-700">
+            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,180px)]">
+              <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                 Question
                 <input
-                  className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                  className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
                   disabled={isAdding}
                   onChange={(event) =>
                     setAddForm((currentForm) => ({
@@ -343,10 +340,10 @@ export default function AdminFaqManager() {
                 />
               </label>
 
-              <label className="grid gap-2 text-sm font-semibold text-stone-700">
+              <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                 Display order
                 <input
-                  className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                  className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
                   disabled={isAdding}
                   onChange={(event) =>
                     setAddForm((currentForm) => ({
@@ -415,9 +412,6 @@ export default function AdminFaqManager() {
       <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
         <div className="border-b border-stone-200 pb-5">
           <h2 className="text-2xl font-semibold text-stone-900">Current FAQs</h2>
-          <p className="mt-2 text-sm text-stone-600">
-            Ordered by display_order from smallest to largest.
-          </p>
         </div>
 
         {sortedFaqItems.length === 0 ? (
@@ -437,11 +431,11 @@ export default function AdminFaqManager() {
                   className="rounded-2xl border border-stone-200 bg-stone-50 p-5"
                   key={faqItem.id}
                 >
-                  <div className="grid gap-5 md:grid-cols-[1fr_180px]">
-                    <label className="grid gap-2 text-sm font-semibold text-stone-700">
+                  <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,180px)]">
+                    <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                       Question
                       <input
-                        className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                        className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
                         disabled={isSaving || isDeleting}
                         onChange={(event) =>
                           updateExistingForm(faqItem.id, "question", event.target.value)
@@ -451,10 +445,10 @@ export default function AdminFaqManager() {
                       />
                     </label>
 
-                    <label className="grid gap-2 text-sm font-semibold text-stone-700">
+                    <label className="grid min-w-0 gap-2 text-sm font-semibold text-stone-700">
                       Display order
                       <input
-                        className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
+                        className="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 outline-none transition focus:border-stone-600 focus:ring-2 focus:ring-stone-200"
                         disabled={isSaving || isDeleting}
                         onChange={(event) =>
                           updateExistingForm(faqItem.id, "display_order", event.target.value)

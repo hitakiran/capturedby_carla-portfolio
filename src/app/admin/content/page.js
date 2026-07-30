@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
-import AdminPortfolioManager from "@/components/admin/AdminPortfolioManager";
+import AdminContentEditor from "@/components/admin/AdminContentEditor";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Portfolio Photos | Carla Santos Photography",
+  title: "Content Editor | Carla Santos Photography",
 };
 
-export default async function AdminPortfolioPage() {
+export default async function AdminContentPage() {
   const supabase = await createClient();
 
-  // Keep this admin page protected even if someone visits the URL directly.
+  // Keep the content editor protected if someone visits /admin/content directly.
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -20,7 +20,7 @@ export default async function AdminPortfolioPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-12">
-      <AdminPortfolioManager />
+      <AdminContentEditor />
     </main>
   );
 }

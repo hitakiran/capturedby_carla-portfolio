@@ -3,7 +3,7 @@ import AdminFaqManager from "@/components/admin/AdminFaqManager";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "FAQ Editor | Carla Santos Photography",
+  title: "FAQ Edit | Carla Santos Photography",
 };
 
 export default async function AdminFaqPage() {

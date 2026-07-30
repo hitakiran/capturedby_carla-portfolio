@@ -3,7 +3,7 @@ import AdminSiteImagesManager from "@/components/admin/AdminSiteImagesManager";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Site Images | Carla Santos Photography",
+  title: "Single- Purpose Photos | Carla Santos Photography",
 };
 
 export default async function AdminSiteImagesPage() {
