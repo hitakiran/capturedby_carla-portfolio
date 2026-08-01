@@ -124,19 +124,25 @@ function buildLiveInvestmentCategories(packages) {
 async function getInvestmentCategories() {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("investment_packages")
-    .select(
-      "id, category, section_title, package_title, description, features, price, display_order, created_at",
-    )
-    .order("display_order", { ascending: true })
-    .order("created_at", { ascending: true });
+  try {
+    const { data, error } = await supabase
+      .from("investment_packages")
+      .select(
+        "id, category, section_title, package_title, description, features, price, display_order, created_at",
+      )
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: true });
 
-  if (error) {
+    if (error) {
+      return investmentCategories;
+    }
+
+    return buildLiveInvestmentCategories(sortByDisplayOrder(data || []));
+  } catch {
+    // When live package data cannot load, the public page keeps its fallback
+    // cards so visitors can still browse the Investment page.
     return investmentCategories;
   }
-
-  return buildLiveInvestmentCategories(sortByDisplayOrder(data || []));
 }
 
 export default async function InvestmentPage() {

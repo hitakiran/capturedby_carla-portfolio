@@ -13,18 +13,24 @@ export const metadata = {
 async function getFaqItems() {
   const supabase = await createClient();
 
-  // The public FAQ page only shows rows Carla has marked active.
-  const { data, error } = await supabase
-    .from("faq_items")
-    .select("id, question, answer, display_order, is_active")
-    .eq("is_active", true)
-    .order("display_order", { ascending: true });
+  try {
+    // The public FAQ page only shows rows Carla has marked active.
+    const { data, error } = await supabase
+      .from("faq_items")
+      .select("id, question, answer, display_order, is_active")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true });
 
-  if (error) {
+    if (error) {
+      return [];
+    }
+
+    return data || [];
+  } catch {
+    // If the FAQ table cannot load, show the friendly "coming soon" message
+    // that already exists on the page.
     return [];
   }
-
-  return data || [];
 }
 
 export default async function FaqPage() {

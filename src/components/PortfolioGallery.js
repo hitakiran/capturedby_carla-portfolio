@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import GalleryGrid from "@/components/portfolio/GalleryGrid";
 import RevealOnScroll from "@/components/RevealOnScroll";
 import Sidebar from "@/components/portfolio/Sidebar";
@@ -40,6 +40,8 @@ export default function PortfolioGallery({ categories, heading, intro, photos })
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
+  const fileInputRef = useRef(null);
+  const searchRequestIdRef = useRef(0);
   const hasIntroHeader = heading || intro;
 
   const filteredPhotos = useMemo(() => {
@@ -55,9 +57,42 @@ export default function PortfolioGallery({ categories, heading, intro, photos })
     [searchResults],
   );
 
+  const isSearchActive =
+    query.trim().length > 0 ||
+    Boolean(selectedImage) ||
+    hasSearched ||
+    isSearching ||
+    Boolean(searchError);
+
   function chooseCategory(category) {
     setActiveCategory(category);
     setIsMenuOpen(false);
+  }
+
+  function openImagePicker() {
+    /*
+      The file input is visually hidden so the search UI can stay compact.
+      Clicking the image icon opens the normal browser file picker.
+    */
+    fileInputRef.current?.click();
+  }
+
+  function clearSearch() {
+    /*
+      Clearing search should return the page to the regular portfolio view.
+      We reset every search-related value, including the hidden file input.
+    */
+    searchRequestIdRef.current += 1;
+    setQuery("");
+    setSelectedImage(null);
+    setSearchResults([]);
+    setHasSearched(false);
+    setIsSearching(false);
+    setSearchError("");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
   async function handleSearch(event) {
@@ -73,6 +108,13 @@ export default function PortfolioGallery({ categories, heading, intro, photos })
     setIsSearching(true);
     setSearchError("");
     setHasSearched(false);
+
+    /*
+      This id helps us ignore an older search response if the user clears the
+      search before the API finishes responding.
+    */
+    const requestId = searchRequestIdRef.current + 1;
+    searchRequestIdRef.current = requestId;
 
     try {
       let response;
@@ -109,14 +151,22 @@ export default function PortfolioGallery({ categories, heading, intro, photos })
         throw new Error(result.error || "Photo search failed.");
       }
 
-      setSearchResults(result.matches || []);
-      setHasSearched(true);
+      if (searchRequestIdRef.current === requestId) {
+        setSearchResults(result.matches || []);
+        setHasSearched(true);
+      }
     } catch (error) {
-      setSearchResults([]);
-      setHasSearched(true);
-      setSearchError(error.message || "Photo search failed. Please try again.");
+      if (searchRequestIdRef.current === requestId) {
+        setSearchResults([]);
+        setHasSearched(true);
+        setSearchError(
+          error.message || "Photo search failed. Please try again.",
+        );
+      }
     } finally {
-      setIsSearching(false);
+      if (searchRequestIdRef.current === requestId) {
+        setIsSearching(false);
+      }
     }
   }
 
@@ -150,63 +200,109 @@ export default function PortfolioGallery({ categories, heading, intro, photos })
         <RevealOnScroll>
           <section
             aria-label="Search portfolio photos"
-            className="mb-12 rounded-[2rem] border border-[rgba(var(--text-rgb),0.16)] bg-[rgba(var(--section-alternate-rgb),0.55)] p-6 shadow-[0_16px_36px_rgba(70,60,50,0.08)] sm:p-8"
+            className="mb-16 flex justify-center"
           >
-            <p className="section-eyebrow">Search</p>
-            <h2 className="mt-3 text-3xl font-medium text-[var(--walnut)] sm:text-4xl">
-              Find photos by feeling
-            </h2>
-            <p className="mt-3 max-w-2xl text-lg leading-relaxed text-[rgba(var(--text-rgb),0.76)]">
-              Type a description, or upload an inspiration image to find
-              portfolio photos with a similar mood.
-            </p>
+            <div className="w-full max-w-4xl">
+              <div className="relative">
+                <form onSubmit={handleSearch}>
+                  <label className="sr-only" htmlFor="portfolio-photo-search">
+                    Search portfolio photos
+                  </label>
+                  <div className="flex items-center gap-2 rounded-full border border-[rgba(var(--text-rgb),0.18)] bg-[rgba(var(--background-rgb),0.92)] px-4 py-3 shadow-[0_14px_30px_rgba(var(--text-rgb),0.08)] transition-all duration-200 ease-out focus-within:border-[var(--dusty-olive)] focus-within:shadow-[0_18px_34px_rgba(var(--text-rgb),0.12)] sm:px-5">
+                    <input
+                      className="min-w-0 flex-1 bg-transparent px-2 py-2 text-base text-[var(--walnut)] outline-none placeholder:text-[rgba(var(--text-rgb),0.48)] sm:text-lg"
+                      id="portfolio-photo-search"
+                      onChange={(event) => setQuery(event.target.value)}
+                      placeholder="Type a description, or upload an inspiration image to find portfolio photos with a similar mood."
+                      type="text"
+                      value={query}
+                    />
 
-            <form className="mt-7 grid gap-5" onSubmit={handleSearch}>
-              <label className="grid gap-2 text-sm font-bold uppercase tracking-[0.14em] text-[var(--walnut)]">
-                Search description
-                <input
-                  className="w-full rounded-full border border-[rgba(var(--text-rgb),0.2)] bg-[var(--sand)] px-5 py-4 text-base normal-case tracking-[0] text-[var(--walnut)] outline-none transition-all duration-200 ease-out placeholder:text-[rgba(var(--text-rgb),0.45)] focus:border-[var(--clay)] focus:shadow-[0_0_0_4px_rgba(var(--text-rgb),0.06)]"
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="golden hour backlighting"
-                  type="search"
-                  value={query}
-                />
-              </label>
+                    <input
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(event) =>
+                        setSelectedImage(event.target.files?.[0] || null)
+                      }
+                      ref={fileInputRef}
+                      type="file"
+                    />
 
-              <div className="grid gap-3 rounded-[1.5rem] border border-dashed border-[rgba(var(--text-rgb),0.22)] bg-[rgba(var(--background-rgb),0.5)] p-5">
-                <label className="grid gap-2 text-sm font-bold uppercase tracking-[0.14em] text-[var(--walnut)]">
-                  Or upload an image to find similar photos
-                  <input
-                    accept="image/*"
-                    className="w-full rounded-full border border-[rgba(var(--text-rgb),0.2)] bg-[var(--sand)] px-4 py-3 text-base normal-case tracking-[0] text-[var(--walnut)] file:mr-4 file:rounded-full file:border-0 file:bg-[var(--clay)] file:px-5 file:py-2 file:text-sm file:font-bold file:uppercase file:tracking-[0.12em] file:text-[var(--sand)]"
-                    onChange={(event) =>
-                      setSelectedImage(event.target.files?.[0] || null)
-                    }
-                    type="file"
-                  />
-                </label>
+                    <button
+                      aria-label="Upload an inspiration image"
+                      className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-[var(--dusty-olive)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[var(--section-alternate)] hover:text-[var(--walnut)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--dusty-olive)]"
+                      onClick={openImagePicker}
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.8"
+                        viewBox="0 0 24 24"
+                      >
+                        <rect height="16" rx="2.5" width="18" x="3" y="4" />
+                        <circle cx="8.5" cy="9" r="1.5" />
+                        <path d="m21 16-5.4-5.4a1.4 1.4 0 0 0-2 0L5 19" />
+                      </svg>
+                    </button>
 
-                {selectedImage && (
-                  <p className="text-sm text-[rgba(var(--text-rgb),0.68)]">
-                    Selected image: {selectedImage.name}
-                  </p>
+                    <button
+                      aria-label="Search portfolio photos"
+                      className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--dusty-olive)] text-[var(--sand)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-105 hover:bg-[var(--walnut)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--dusty-olive)] disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={isSearching}
+                      type="submit"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.8"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="m16.5 16.5 3.5 3.5" />
+                      </svg>
+                    </button>
+                  </div>
+                </form>
+
+                {isSearchActive && (
+                  <button
+                    aria-label="Clear photo search"
+                    className="absolute -right-2 -top-2 grid h-9 w-9 place-items-center rounded-full border border-[rgba(var(--text-rgb),0.18)] bg-[var(--section-alternate)] text-xl leading-none text-[var(--walnut)] shadow-[0_8px_18px_rgba(var(--text-rgb),0.10)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[var(--dusty-olive)] hover:text-[var(--sand)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--dusty-olive)]"
+                    onClick={clearSearch}
+                    type="button"
+                  >
+                    ×
+                  </button>
                 )}
               </div>
 
+              {selectedImage && (
+                <p className="mt-3 text-center text-sm text-[rgba(var(--text-rgb),0.68)]">
+                  Image selected: {selectedImage.name}
+                </p>
+              )}
+
               {searchError && (
-                <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <p className="mt-3 rounded-full border border-[rgba(var(--text-rgb),0.16)] bg-[var(--section-alternate)] px-5 py-3 text-center text-sm text-[var(--walnut)]">
                   {searchError}
                 </p>
               )}
 
-              <button
-                className="text-button w-fit disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={isSearching}
-                type="submit"
-              >
-                {isSearching ? "Searching..." : "Search Photos"}
-              </button>
-            </form>
+              {isSearching && (
+                <p className="mt-3 text-center text-sm uppercase tracking-[0.14em] text-[var(--dusty-olive)]">
+                  Searching...
+                </p>
+              )}
+            </div>
           </section>
         </RevealOnScroll>
 
@@ -239,9 +335,11 @@ export default function PortfolioGallery({ categories, heading, intro, photos })
           </RevealOnScroll>
         )}
 
-        <RevealOnScroll>
-          <GalleryGrid photos={filteredPhotos} />
-        </RevealOnScroll>
+        {!hasSearched && (
+          <RevealOnScroll>
+            <GalleryGrid photos={filteredPhotos} />
+          </RevealOnScroll>
+        )}
       </main>
     </div>
   );

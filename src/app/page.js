@@ -105,39 +105,50 @@ async function getHomepageData() {
   const supabase = await createClient();
   const categoryNames = categoryShowcase.map((category) => category.category);
 
-  // These queries only fetch public page data. Decorative design files stay local.
-  const [
-    siteContentResult,
-    siteImagesResult,
-    portfolioImagesResult,
-    testimonialsResult,
-  ] = await Promise.all([
-    supabase
-      .from("site_content")
-      .select("id, page, section_key, value, updated_at")
-      .eq("page", "home"),
-    supabase
-      .from("site_images")
-      .select("id, page, image_key, image_url")
-      .eq("page", "home")
-      .in("image_key", ["hero_banner", "about_portrait"]),
-    supabase
-      .from("portfolio_images")
-      .select("id, category, image_url, created_at")
-      .in("category", categoryNames)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("testimonials")
-      .select("id, client_name, testimonial_text, rating, display_order, created_at")
-      .order("created_at", { ascending: true }),
-  ]);
+  try {
+    // These queries only fetch public page data. Decorative design files stay local.
+    const [
+      siteContentResult,
+      siteImagesResult,
+      portfolioImagesResult,
+      testimonialsResult,
+    ] = await Promise.all([
+      supabase
+        .from("site_content")
+        .select("id, page, section_key, value, updated_at")
+        .eq("page", "home"),
+      supabase
+        .from("site_images")
+        .select("id, page, image_key, image_url")
+        .eq("page", "home")
+        .in("image_key", ["hero_banner", "about_portrait"]),
+      supabase
+        .from("portfolio_images")
+        .select("id, category, image_url, created_at")
+        .in("category", categoryNames)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("testimonials")
+        .select("id, client_name, testimonial_text, rating, display_order, created_at")
+        .order("created_at", { ascending: true }),
+    ]);
 
-  return {
-    siteContent: siteContentResult.data || [],
-    siteImages: siteImagesResult.data || [],
-    portfolioImages: portfolioImagesResult.data || [],
-    testimonials: testimonialsResult.data || [],
-  };
+    return {
+      siteContent: siteContentResult.data || [],
+      siteImages: siteImagesResult.data || [],
+      portfolioImages: portfolioImagesResult.data || [],
+      testimonials: testimonialsResult.data || [],
+    };
+  } catch {
+    // If Supabase is unreachable, keep the homepage alive with hardcoded
+    // fallback content instead of showing a network error.
+    return {
+      siteContent: [],
+      siteImages: [],
+      portfolioImages: [],
+      testimonials: [],
+    };
+  }
 }
 
 export default async function Home() {

@@ -8,7 +8,7 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MINIMUM_SEARCH_SIMILARITY = 0.2;
+const MINIMUM_SEARCH_SIMILARITY = 0.25;
 const SEARCH_RESULT_LIMIT = 12;
 
 function logFullSearchError(label, error) {
@@ -60,37 +60,31 @@ async function getSearchInput(request) {
 
 async function searchPortfolioImages(supabase, queryEmbedding) {
   /*
-    Newer versions of the Supabase RPC accept match_threshold and match_count,
-    so the database can skip weak matches before returning results.
+    The database function is already ordered by similarity, best match first.
+    Passing match_threshold here lets Supabase return zero results when nothing
+    is meaningfully similar instead of forcing a fixed number of weak matches.
   */
-  const thresholdSearch = await supabase.rpc("match_portfolio_images", {
+  return supabase.rpc("match_portfolio_images", {
     query_embedding: queryEmbedding,
-    match_threshold: MINIMUM_SEARCH_SIMILARITY,
     match_count: SEARCH_RESULT_LIMIT,
+    match_threshold: MINIMUM_SEARCH_SIMILARITY,
   });
+}
 
-  if (!thresholdSearch.error) {
-    return thresholdSearch;
-  }
-
+function logRawSimilarityScores(results) {
   /*
-    This fallback keeps the website from breaking if the SQL function has not
-    been updated in Supabase yet. The API still filters weak matches below.
+    Debug log:
+    These are the scores Supabase returned after applying match_threshold.
+    If this list is empty, the frontend will show the "no matches" message.
   */
-  console.warn(
-    "Threshold search RPC failed. Falling back to the older match_portfolio_images signature.",
-    thresholdSearch.error,
+  console.log(
+    "Portfolio search similarity scores returned by Supabase:",
+    (results || []).map((photo) => ({
+      id: photo.id,
+      category: photo.category,
+      similarity: Number(photo.similarity || 0),
+    })),
   );
-
-  const fallbackSearch = await supabase.rpc("match_portfolio_images", {
-    query_embedding: queryEmbedding,
-  });
-
-  if (!fallbackSearch.error) {
-    return fallbackSearch;
-  }
-
-  return thresholdSearch;
 }
 
 export async function POST(request) {
@@ -141,14 +135,16 @@ export async function POST(request) {
       );
     }
 
+    logRawSimilarityScores(data);
+
     const matches = (data || [])
       .filter((photo) => {
         /*
-          The SQL function should already apply this threshold. Keeping the
-          check here too protects us if Supabase is still running the old RPC.
+          The SQL function applies this threshold first. Keeping the same check
+          here protects the UI if the database function changes later.
         */
         const similarity = Number(photo.similarity || 0);
-        return photo.image_url && similarity >= MINIMUM_SEARCH_SIMILARITY;
+        return photo.image_url && similarity > MINIMUM_SEARCH_SIMILARITY;
       })
       .slice(0, SEARCH_RESULT_LIMIT)
       .map((photo) => ({

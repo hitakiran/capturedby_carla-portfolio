@@ -41,7 +41,7 @@ export default function GalleryImage({ delay, photo }) {
       style={{ transitionDelay: delay }}
     >
       <Image
-        alt={photo.caption}
+        alt={`${photo.category} portfolio photo`}
         className="h-auto w-full object-cover"
         height={photo.height}
         loading="lazy"

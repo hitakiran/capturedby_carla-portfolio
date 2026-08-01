@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { fetchWithTimeout } from "@/lib/supabase/fetchWithTimeout";
 
 // This helper creates a new Supabase client for each Server Component request.
 // It reads the user's auth cookies so server-rendered admin pages know who is signed in.
@@ -27,6 +28,9 @@ export async function createClient() {
             */
           }
         },
+      },
+      global: {
+        fetch: fetchWithTimeout,
       },
     },
   );

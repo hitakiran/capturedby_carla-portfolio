@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { fetchWithTimeout } from "@/lib/supabase/fetchWithTimeout";
 
 // updateSession refreshes Supabase Auth cookies before protected admin pages load.
 // It runs for /admin routes and redirects signed-out visitors to /admin/login.
@@ -37,12 +38,25 @@ export async function updateSession(request) {
           });
         },
       },
+      global: {
+        fetch: fetchWithTimeout,
+      },
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+
+  try {
+    const {
+      data: { user: activeUser },
+    } = await supabase.auth.getUser();
+
+    user = activeUser;
+  } catch {
+    // If Supabase is temporarily unreachable, treat the visitor as signed out
+    // instead of letting the admin route hang or show a raw network overlay.
+    user = null;
+  }
 
   const pathname = request.nextUrl.pathname;
   const isLoginPage = pathname.startsWith("/admin/login");
