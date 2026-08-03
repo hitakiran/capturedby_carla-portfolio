@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 // GalleryImage handles the small fade/slide-in animation for each photo card.
@@ -40,12 +39,14 @@ export default function GalleryImage({ delay, photo }) {
       ref={imageRef}
       style={{ transitionDelay: delay }}
     >
-      <Image
+      {/* Use a regular img tag here so admin-uploaded Supabase images render even
+          if the storage hostname changes later. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         alt={`${photo.category} portfolio photo`}
         className="h-auto w-full object-cover"
         height={photo.height}
         loading="lazy"
-        sizes="(max-width: 768px) 92vw, (max-width: 1280px) 42vw, 28vw"
         src={photo.image_url}
         width={photo.width}
       />

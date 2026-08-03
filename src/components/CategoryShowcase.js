@@ -23,6 +23,9 @@ export default function CategoryShowcase({ categories }) {
   }, [categories.length]);
 
   const activeCategory = categories[activeIndex];
+  // This collage has four designed photo positions. If the database has more
+  // photos in a category, show only the first four here so the layout stays tight.
+  const visiblePhotos = activeCategory.photos.slice(0, 4);
 
   function showCategory(nextIndex) {
     // This helper makes tab clicks easy to read and avoids repeating setActiveIndex.
@@ -52,11 +55,11 @@ export default function CategoryShowcase({ categories }) {
       {/* This patterned area holds the rotating photos, text frame, and dots. */}
       <div className="showcase-pattern-area">
         <div
-          className={`showcase-collage ${activeCategory.layoutVariant}`}
+          className={`showcase-collage ${activeCategory.layoutVariant} showcase-category-${activeCategory.id}`}
           key={activeCategory.id}
         >
           {/* Decorative placeholder photos around the center callout. */}
-          {activeCategory.photos.map((photoUrl, photoIndex) => (
+          {visiblePhotos.map((photoUrl, photoIndex) => (
             <div
               className={`showcase-photo showcase-photo-${photoIndex + 1}`}
               key={`${activeCategory.id}-${photoUrl}`}
@@ -66,7 +69,10 @@ export default function CategoryShowcase({ categories }) {
                 src={photoUrl}
                 alt={`${activeCategory.category} placeholder photo`}
                 fill
-                sizes="(max-width: 768px) 42vw, 260px"
+                // These images are displayed as decorative collage photos.
+                // A larger sizes value + higher quality keeps uploaded photos crisp.
+                sizes="(max-width: 768px) 48vw, (max-width: 1100px) 280px, 380px"
+                quality={92}
                 className="object-cover"
               />
             </div>

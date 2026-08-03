@@ -128,6 +128,35 @@ a {
   background-color: var(--accent);
 }
 
+.admin-login-lace-strip {
+  /*
+    Reuse the same lace artwork from the public pages.
+    This wrapper creates a visible top strip, and the ::before below holds the
+    actual lace image so the color filter only affects the image.
+  */
+  height: 72px;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
+}
+
+.admin-login-lace-strip::before {
+  background-image: url("/images/design.png?v=1");
+  background-position: left top;
+  background-repeat: repeat-x;
+  background-size: auto 72px;
+  content: "";
+  filter: brightness(0) saturate(100%) invert(42%) sepia(9%)
+    saturate(693%) hue-rotate(31deg) brightness(91%) contrast(87%);
+  inset: 0;
+  opacity: 1;
+  position: absolute;
+}
+
 .admin-shell button:hover,
 .admin-shell a:hover {
   color: var(--walnut);
@@ -667,10 +696,10 @@ a {
     minmax(180px, 1fr)
     minmax(520px, 760px)
     minmax(180px, 1fr);
-  grid-template-rows: repeat(2, minmax(350px, 1fr));
+  grid-template-rows: repeat(2, minmax(285px, 1fr));
   margin: 0 auto;
   max-width: 1760px;
-  min-height: 820px;
+  min-height: 670px;
   width: 100%;
 }
 
@@ -780,6 +809,16 @@ a {
 
 .layout-three .showcase-photo-4 {
   transform: translateY(-6px);
+}
+
+.showcase-category-couples {
+  /*
+    Uploaded Couples photos can make this specific collage feel much taller
+    than the other categories on desktop. This keeps Couples compact so its
+    dots and the next section sit at the same visual rhythm as Wedding.
+  */
+  grid-template-rows: repeat(2, minmax(220px, 1fr));
+  min-height: 560px;
 }
 
 .layout-four .showcase-photo-1 {
@@ -1228,8 +1267,8 @@ a {
       minmax(135px, 1fr)
       minmax(330px, 500px)
       minmax(135px, 1fr);
-    grid-template-rows: repeat(2, minmax(290px, 1fr));
-    min-height: 690px;
+    grid-template-rows: repeat(2, minmax(245px, 1fr));
+    min-height: 570px;
   }
 
   .showcase-photo {
@@ -1239,6 +1278,11 @@ a {
   .showcase-photo-3,
   .showcase-photo-4 {
     max-width: 220px;
+  }
+
+  .showcase-category-couples {
+    grid-template-rows: repeat(2, minmax(190px, 1fr));
+    min-height: 470px;
   }
 }
 
@@ -1279,6 +1323,12 @@ a {
     gap: 14px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: auto auto;
+    /*
+      On phones, the photos sit directly above the slideshow dots.
+      This bottom margin gives the dots their own space so they do not touch
+      the photo row.
+    */
+    margin-bottom: 42px;
     min-height: 0;
   }
 
@@ -1307,6 +1357,18 @@ a {
     width: 100%;
   }
 
+  .showcase-collage .showcase-photo-1,
+  .showcase-collage .showcase-photo-2,
+  .showcase-collage .showcase-photo-3,
+  .showcase-collage .showcase-photo-4 {
+    /*
+      The desktop collage uses small translate() nudges for variety.
+      On phones those nudges can push some category photos into the dots, so
+      this more specific rule resets every photo to a clean mobile grid.
+    */
+    transform: none;
+  }
+
   .showcase-photo-1 {
     grid-column: 1;
   }
@@ -1321,8 +1383,12 @@ a {
   }
 
   .showcase-card {
-    /* Smaller screens still need enough inset so text avoids the dotted border. */
-    padding: 88px 54px;
+    /*
+      The round lace frame gets tight on tablets/phones, so the text needs a
+      smaller safe area than desktop to stay readable inside the circle.
+    */
+    gap: 10px;
+    padding: 78px 64px;
   }
 
   .showcase-card-block {
@@ -1336,11 +1402,15 @@ a {
   }
 
   .showcase-card-frame {
-    max-width: 500px;
+    max-width: 430px;
   }
 
   .showcase-actions {
     margin-top: 14px;
+  }
+
+  .showcase-dots {
+    margin-top: 0;
   }
 
   .about-section {
@@ -1365,7 +1435,34 @@ a {
 
   .showcase-card h2 {
     /* Small screens get a smaller heading so it still stays on one line. */
-    font-size: clamp(2.5rem, 12vw, 3.1rem);
+    font-size: clamp(2.4rem, 10.8vw, 2.85rem);
+  }
+
+  .showcase-category-wedding .showcase-card h2 {
+    /*
+      "Wedding" is the widest script title, so it gets a tiny phone-only
+      reduction to keep it from touching the lace frame.
+    */
+    font-size: clamp(2.25rem, 10vw, 2.65rem);
+  }
+
+  .showcase-card {
+    padding: 74px 58px;
+  }
+
+  .showcase-card p:not(.section-eyebrow) {
+    font-size: 0.86rem;
+    line-height: 1.45;
+    max-width: 165px;
+  }
+
+  .showcase-card .section-eyebrow {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+  }
+
+  .showcase-card-frame {
+    max-width: 355px;
   }
 }
 

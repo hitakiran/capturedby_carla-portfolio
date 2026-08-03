@@ -28,7 +28,10 @@ function getSiteImageUrl(siteImages, imageKey, fallbackUrl) {
 function getCategoryPhotos(portfolioImages, categoryName, fallbackPhotos) {
   const matchingPhotos = portfolioImages
     .filter((image) => image.category === categoryName && image.image_url)
-    .map((image) => image.image_url);
+    .map((image) => image.image_url)
+    // The homepage collage layout is designed for four photos only.
+    // Limiting live Supabase photos keeps extra uploads from creating blank grid space.
+    .slice(0, 4);
 
   // Only fall back when a category has no database photos yet.
   if (matchingPhotos.length === 0) {

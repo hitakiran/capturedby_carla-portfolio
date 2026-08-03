@@ -19,12 +19,12 @@ const adminSections = [
   },
   {
     title: "Site Images",
-    description: "Replace single-purpose images (hear & portrait).",
+    description: "Replace single-purpose images (hero banner & portrait).",
     href: "/admin/site-images",
   },
   {
     title: "Content",
-    description: 'Edit "About me" and "stats" numbers.',
+    description: 'Edit "About me" and "Stats" numbers.',
     href: "/admin/content",
   },
   {

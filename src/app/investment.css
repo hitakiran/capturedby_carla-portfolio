@@ -250,7 +250,13 @@
 }
 
 @media (max-width: 900px) {
-  .investment-package-grid {
+  .investment-package-grid,
+  .investment-package-grid.has-two-packages {
+    /*
+      Two-package categories like Brands use a special desktop class.
+      This mobile override makes those cards stack vertically like the other
+      categories, so the package text stays easy to read on phones.
+    */
     grid-template-columns: 1fr;
   }
 

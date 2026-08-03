@@ -336,9 +336,7 @@ export default function PortfolioGallery({ categories, heading, intro, photos })
         )}
 
         {!hasSearched && (
-          <RevealOnScroll>
-            <GalleryGrid photos={filteredPhotos} />
-          </RevealOnScroll>
+          <GalleryGrid photos={filteredPhotos} />
         )}
       </main>
     </div>
