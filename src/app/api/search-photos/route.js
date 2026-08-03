@@ -10,6 +10,8 @@ export const dynamic = "force-dynamic";
 
 const MINIMUM_SEARCH_SIMILARITY = 0.25;
 const SEARCH_RESULT_LIMIT = 12;
+const DEBUG_SEARCH_THRESHOLD = -1;
+const DEBUG_SEARCH_RESULT_LIMIT = 50;
 
 function logFullSearchError(label, error) {
   /*
@@ -71,14 +73,38 @@ async function searchPortfolioImages(supabase, queryEmbedding) {
   });
 }
 
-function logRawSimilarityScores(results) {
+async function debugUnfilteredPortfolioSearch(supabase, queryEmbedding) {
+  /*
+    Temporary debug call:
+    This bypasses the real threshold so we can see the raw score range coming
+    back from Supabase. The actual website results still use the real threshold.
+  */
+  return supabase.rpc("match_portfolio_images", {
+    query_embedding: queryEmbedding,
+    match_count: DEBUG_SEARCH_RESULT_LIMIT,
+    match_threshold: DEBUG_SEARCH_THRESHOLD,
+  });
+}
+
+function logQueryEmbeddingSummary(queryEmbedding) {
+  /*
+    The full vector has 512 numbers, so logging the entire thing would be noisy.
+    Length + first 5 values tells us whether the model returned a real vector.
+  */
+  console.log("Photo search query embedding summary:", {
+    length: queryEmbedding.length,
+    firstFiveValues: queryEmbedding.slice(0, 5),
+  });
+}
+
+function logSimilarityScores(label, results) {
   /*
     Debug log:
-    These are the scores Supabase returned after applying match_threshold.
-    If this list is empty, the frontend will show the "no matches" message.
+    This keeps the terminal output readable while still showing the score range
+    and order returned by the database.
   */
   console.log(
-    "Portfolio search similarity scores returned by Supabase:",
+    label,
     (results || []).map((photo) => ({
       id: photo.id,
       category: photo.category,
@@ -109,6 +135,7 @@ export async function POST(request) {
           : await generateTextEmbedding(searchInput.value);
 
       console.log("Search embedding generated successfully");
+      logQueryEmbeddingSummary(queryEmbedding);
     } catch (embeddingError) {
       logFullSearchError("Photo search embedding failed", embeddingError);
 
@@ -119,6 +146,29 @@ export async function POST(request) {
     }
 
     const supabase = await createClient();
+
+    /*
+      TEMPORARY DEBUGGING:
+      First ask Supabase for unfiltered results with threshold -1. This lets us
+      see whether scores exist but are below 0.25, or whether the RPC/vector is
+      failing before the real threshold is applied.
+    */
+    const {
+      data: unfilteredData,
+      error: unfilteredError,
+    } = await debugUnfilteredPortfolioSearch(supabase, queryEmbedding);
+
+    if (unfilteredError) {
+      logFullSearchError(
+        "Unfiltered photo search debug RPC failed",
+        unfilteredError,
+      );
+    } else {
+      logSimilarityScores(
+        "UNFILTERED portfolio search similarity scores (threshold -1):",
+        unfilteredData,
+      );
+    }
 
     /*
       match_portfolio_images is a Supabase database function that compares
@@ -135,7 +185,10 @@ export async function POST(request) {
       );
     }
 
-    logRawSimilarityScores(data);
+    logSimilarityScores(
+      `FILTERED portfolio search similarity scores returned by Supabase (threshold ${MINIMUM_SEARCH_SIMILARITY}):`,
+      data,
+    );
 
     const matches = (data || [])
       .filter((photo) => {

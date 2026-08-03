@@ -620,9 +620,6 @@ export default function AdminInvestmentManager() {
         <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
           <div className="border-b border-stone-200 pb-5">
             <h2 className="text-2xl font-semibold text-stone-900">Add package</h2>
-            <p className="mt-2 text-sm text-stone-600">
-              Pick one of Carla&apos;s package categories.
-            </p>
           </div>
 
           <form className="mt-6 grid gap-5" onSubmit={handleAddPackage}>
