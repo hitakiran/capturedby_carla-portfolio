@@ -59,9 +59,16 @@ export async function updateSession(request) {
   }
 
   const pathname = request.nextUrl.pathname;
-  const isLoginPage = pathname.startsWith("/admin/login");
+  const publicAdminPages = [
+    "/admin/login",
+    "/admin/forgot-password",
+    "/admin/reset-password",
+  ];
+  const isPublicAdminPage = publicAdminPages.some((publicPath) => {
+    return pathname.startsWith(publicPath);
+  });
 
-  if (!user && !isLoginPage) {
+  if (!user && !isPublicAdminPage) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/admin/login";
     redirectUrl.searchParams.set("next", pathname);

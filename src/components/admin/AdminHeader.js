@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LogoutButton from "@/components/admin/LogoutButton";
 
-// AdminHeader is hidden on the login page so visitors do not see admin links
-// before they have signed in.
+// AdminHeader is hidden on auth pages so visitors do not see admin links
+// before they have signed in or while they are resetting a password.
 export default function AdminHeader() {
   const pathname = usePathname();
+  const authPages = ["/admin/login", "/admin/forgot-password", "/admin/reset-password"];
+  const isAuthPage = authPages.some((authPath) => pathname.startsWith(authPath));
 
-  if (pathname === "/admin/login") {
+  if (isAuthPage) {
     return null;
   }
 
