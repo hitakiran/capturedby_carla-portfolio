@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+const EMAIL_FROM_ADDRESS = "Carla Santos Photography <hello@capturedbycarlas.com>";
 const SUCCESS_MESSAGE =
   "Thanks for filling it out! I will reach out soon to set up a 15-minute meeting to discuss more.";
 const CONTACT_SUCCESS_MESSAGE =
@@ -172,7 +173,7 @@ async function sendNotificationEmail(payload) {
   const subjectName = payload.clientName || "a website visitor";
 
   const { error } = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: EMAIL_FROM_ADDRESS,
     to: process.env.NOTIFY_EMAIL,
     subject: `New ${payload.formType} from ${subjectName}`,
     text: buildPlainTextEmail(payload),
@@ -194,7 +195,7 @@ async function sendClientConfirmationEmail(payload) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const subject = getClientConfirmationSubject(payload);
   const { error } = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: EMAIL_FROM_ADDRESS,
     to: payload.clientEmail,
     subject,
     text: buildClientConfirmationText(payload),
